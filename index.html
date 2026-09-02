@@ -114,38 +114,42 @@
     color:var(--plum-800);
   }
 
-  /* ---- Topics timeline ---- */
-  ol.topic-list{
-    list-style:none;
-    margin:0;
-    padding:0;
-    counter-reset:topic;
+  /* ---- Upcoming topics table (institute-wide, not per-student) ---- */
+  table.topics-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.92rem;
   }
-  ol.topic-list li{
-    counter-increment:topic;
-    position:relative;
-    padding:0 0 20px 40px;
-    border-left:2px solid var(--paper-line);
-    margin-left:10px;
+  table.topics-table thead th{
+    text-align:left;
+    padding:8px 10px 10px;
+    border-bottom:2px solid var(--paper-line);
+    color:var(--ink-soft);
+    font-weight:600;
+    font-size:0.78rem;
   }
-  ol.topic-list li:last-child{
-    border-left:2px solid transparent;
-    padding-bottom:0;
+  table.topics-table tbody td{
+    padding:10px 10px;
+    border-bottom:1px solid var(--paper-line);
+    vertical-align:top;
   }
-  ol.topic-list li::before{
-    content:counter(topic);
-    position:absolute;
-    left:-15px;
-    top:-2px;
-    width:26px;
-    height:26px;
-    border-radius:50%;
-    background:var(--pink);
-    color:#fff;
+  table.topics-table tbody tr:last-child td{
+    border-bottom:none;
+  }
+  .institute-pill{
+    display:inline-block;
+    padding:3px 11px;
+    border-radius:20px;
     font-size:0.8rem;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    font-weight:600;
+    background:var(--pink-soft);
+    color:var(--pink);
+    white-space:nowrap;
+  }
+  .topic-date-cell{
+    white-space:nowrap;
+    color:var(--ink-soft);
+    font-size:0.88rem;
   }
   .topic-empty, .topic-error{
     color:var(--ink-soft);
@@ -405,7 +409,7 @@
 <main>
 
   <section class="card" id="topicsCard">
-    <h2>ඉදිරි දිනවලට පාඩම් කළ යුතු මාතෘකා</h2>
+    <h2>ආයතන අනුව ඉදිරි පරීක්ෂණ මාතෘකා</h2>
     <div id="topicsBody">
       <p class="topic-empty">මාතෘකා පූරණය වෙමින්...</p>
     </div>
@@ -490,6 +494,7 @@
 const SUPABASE_URL = "https://uqgzlaxsnknheoerbfus.supabase.co/rest/v1/";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZ3psYXhzbmtuaGVvZXJiZnVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MjM2MTUsImV4cCI6MjA3OTI4MzYxNX0.IYWZ7ukx8J-GJMWy7cMk2BWnmzJmJjjE93yEmJie7nQ";
 const TABLE = "class_report";
+const TOPICS_TABLE = "upcoming_topics"; // shared, institute-wide schedule — not per-student
 // NOTE: no separate scores table anymore — test history lives in the
 // `test_scores` jsonb column on class_report itself, one array per student row.
 
@@ -499,6 +504,14 @@ function sbHeaders(){
     "Authorization": "Bearer " + SUPABASE_ANON_KEY,
     "Content-Type": "application/json"
   };
+}
+
+function escapeText(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
 }
 
 const GRADE_ORDER = ["W","S","C","B","A"];
@@ -558,39 +571,64 @@ function linearRegression(values){
   return { slope, intercept };
 }
 
-/* ---------------- Public: upcoming topics (no password needed) ---------------- */
+const SINHALA_MONTHS = [
+  "ජනවාරි","පෙබරවාරි","මාර්තු","අප්‍රේල්","මැයි","ජූනි",
+  "ජූලි","අගෝස්තු","සැප්තැම්බර්","ඔක්තෝබර්","නොවැම්බර්","දෙසැම්බර්"
+];
+
+function formatTopicDate(dateStr){
+  if (!dateStr) return "";
+  const d = new Date(dateStr + "T00:00:00");
+  if (isNaN(d.getTime())) return dateStr;
+  return SINHALA_MONTHS[d.getMonth()] + " " + d.getDate();
+}
+
+/* ---------------- Public: upcoming topics (institute-wide, no password needed) ----------------
+   These come from the `upcoming_topics` table — a single shared schedule for all
+   institutes/branches, not tied to any individual student. */
 async function loadTopics(){
   const body = document.getElementById("topicsBody");
   try{
-    const url = SUPABASE_URL + TABLE + "?select=next_topic,id&next_topic=not.is.null&order=id.asc";
+    const url = SUPABASE_URL + TOPICS_TABLE + "?select=institute,topic_date,topic&order=topic_date.asc";
     const res = await fetch(url, { headers: sbHeaders() });
     if (!res.ok) throw new Error("request failed");
     const rows = await res.json();
 
-    const seen = new Set();
-    const topics = [];
-    rows.forEach(r => {
-      const t = (r.next_topic || "").trim();
-      if (t && !seen.has(t)){
-        seen.add(t);
-        topics.push(t);
-      }
-    });
-
-    if (topics.length === 0){
+    if (rows.length === 0){
       body.innerHTML = '<p class="topic-empty">තවම නව මාතෘකා එකතු කර නැත.</p>';
       return;
     }
 
-    const list = document.createElement("ol");
-    list.className = "topic-list";
-    topics.forEach(t => {
-      const li = document.createElement("li");
-      li.textContent = t;
-      list.appendChild(li);
+    const table = document.createElement("table");
+    table.className = "topics-table";
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>ආයතනය</th>
+          <th>දිනය</th>
+          <th>මාතෘකාව</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+    const tbody = table.querySelector("tbody");
+    rows.forEach(r => {
+      const tr = document.createElement("tr");
+      const instTd = document.createElement("td");
+      instTd.innerHTML = '<span class="institute-pill">' + escapeText(r.institute || "") + '</span>';
+      const dateTd = document.createElement("td");
+      dateTd.className = "topic-date-cell";
+      dateTd.textContent = formatTopicDate(r.topic_date);
+      const topicTd = document.createElement("td");
+      topicTd.textContent = r.topic || "";
+      tr.appendChild(instTd);
+      tr.appendChild(dateTd);
+      tr.appendChild(topicTd);
+      tbody.appendChild(tr);
     });
+
     body.innerHTML = "";
-    body.appendChild(list);
+    body.appendChild(table);
   }catch(err){
     body.innerHTML = '<p class="topic-error">මාතෘකා ලබාගැනීමට නොහැකි විය. නැවත පිටුව load කරන්න.</p>';
   }
@@ -682,11 +720,16 @@ async function showResult(row){
   const marksArr = scores.map(s => Number(s.marks)).filter(n => !isNaN(n));
   const hasHistory = marksArr.length > 0;
 
-  // fall back to the single marks/status columns when no per-test history exists yet
+  // fall back to the single marks column when no per-test history exists yet
   const singleMarks = Number(row.marks);
   const avg = hasHistory ? average(marksArr) : (isNaN(singleMarks) ? 0 : singleMarks);
   const hasAnyMarks = hasHistory || !isNaN(singleMarks);
-  const status = hasAnyMarks ? (row.status || statusFromMarks(avg)) : null;
+
+  // FIX: always derive the grade from the actual average (`avg`), never from
+  // the stored `row.status` column. The stored column can go stale — e.g. it
+  // was set from a single old `marks` value before `test_scores` history
+  // existed — which is exactly why an 81 average could still show "C".
+  const status = hasAnyMarks ? statusFromMarks(avg) : null;
 
   document.getElementById("resSub").textContent = hasHistory
     ? "සියලු පරීක්ෂණ " + marksArr.length + "ක සාමාන්‍යය පදනම් කරගෙන"
