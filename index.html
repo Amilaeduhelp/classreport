@@ -156,6 +156,67 @@
     font-size:0.95rem;
   }
 
+  /* ---- tabs (topics / external links) ---- */
+  .tab-bar{
+    display:flex;
+    gap:8px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .tab-btn{
+    padding:8px 16px;
+    background:var(--paper);
+    border:1px solid var(--paper-line);
+    border-radius:20px;
+    font-family:inherit;
+    font-size:0.86rem;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .tab-btn:hover{ background:var(--pink-soft); color:var(--pink); }
+  .tab-btn.active{
+    background:var(--plum-800);
+    border-color:var(--plum-800);
+    color:#F6EEF4;
+  }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  /* ---- external links list ---- */
+  .link-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    padding:12px 14px;
+    border:1px solid var(--paper-line);
+    border-radius:8px;
+    background:#FEFCF8;
+    margin-bottom:10px;
+    text-decoration:none;
+    transition:border-color 0.15s ease;
+  }
+  .link-item:last-child{ margin-bottom:0; }
+  .link-item:hover{ border-color:var(--pink); }
+  .link-name{
+    color:var(--ink);
+    font-size:0.95rem;
+    line-height:1.4;
+  }
+  .link-go{
+    flex-shrink:0;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:5px 12px;
+    border-radius:20px;
+    background:var(--pink-soft);
+    color:var(--pink);
+    font-size:0.8rem;
+    font-weight:600;
+    white-space:nowrap;
+  }
+
   /* ---- Login form ---- */
   .field{
     margin-bottom:14px;
@@ -361,6 +422,20 @@
     color:var(--ink-soft);
     margin:10px 0 0;
   }
+  .chart-canvas-box{
+    position:relative;
+    width:100%;
+    height:240px;
+  }
+  @media (max-width:480px){
+    .chart-canvas-box{ height:200px; }
+  }
+
+  /* ---- horizontally-scrollable table safety net for narrow phones ---- */
+  .table-scroll{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
 
   /* ---- Rank bar ---- */
   .rank-bar-track{
@@ -409,9 +484,21 @@
 <main>
 
   <section class="card" id="topicsCard">
-    <h2>ආයතන අනුව ඉදිරි පරීක්ෂණ මාතෘකා</h2>
-    <div id="topicsBody">
-      <p class="topic-empty">මාතෘකා පූරණය වෙමින්...</p>
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="topics">ඉදිරි මාතෘකා</button>
+      <button class="tab-btn" data-tab="links">වැදගත් සබැඳි</button>
+    </div>
+
+    <div id="tab-topics" class="tab-panel active">
+      <div id="topicsBody">
+        <p class="topic-empty">මාතෘකා පූරණය වෙමින්...</p>
+      </div>
+    </div>
+
+    <div id="tab-links" class="tab-panel">
+      <div id="linksBody">
+        <p class="topic-empty">සබැඳි පූරණය වෙමින්...</p>
+      </div>
     </div>
   </section>
 
@@ -473,13 +560,17 @@
     </div>
 
     <div class="chart-wrap">
-      <canvas id="trendChart" height="200"></canvas>
+      <div class="chart-canvas-box">
+        <canvas id="trendChart"></canvas>
+      </div>
       <p class="note" id="trendChartNote">ලකුණු කාලයාන්ර ගමන් කරන ආකාරය සහ ප්‍රවණතා රේඛාව (dashed) පෙන්වයි.</p>
     </div>
     <div class="trend-note" id="trendNote"></div>
 
     <div class="chart-wrap">
-      <canvas id="gradeChart" height="180"></canvas>
+      <div class="chart-canvas-box">
+        <canvas id="gradeChart"></canvas>
+      </div>
       <p class="note">ඔබේ සාමාන්‍ය ලකුණු පදනම් කරගත් ශ්‍රේණිය (ඉස්මතු කර ඇති) පන්තියේ අනෙක් සිසුන්ගේ සාමාන්‍ය ලකුණු සමඟ සසඳා ඇත.</p>
     </div>
 
@@ -495,6 +586,7 @@ const SUPABASE_URL = "https://uqgzlaxsnknheoerbfus.supabase.co/rest/v1/";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZ3psYXhzbmtuaGVvZXJiZnVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MjM2MTUsImV4cCI6MjA3OTI4MzYxNX0.IYWZ7ukx8J-GJMWy7cMk2BWnmzJmJjjE93yEmJie7nQ";
 const TABLE = "class_report";
 const TOPICS_TABLE = "upcoming_topics"; // shared, institute-wide schedule — not per-student
+const LINKS_TABLE = "external_links"; // shared external-link list — not per-student
 // NOTE: no separate scores table anymore — test history lives in the
 // `test_scores` jsonb column on class_report itself, one array per student row.
 
@@ -628,7 +720,10 @@ async function loadTopics(){
     });
 
     body.innerHTML = "";
-    body.appendChild(table);
+    const scrollWrap = document.createElement("div");
+    scrollWrap.className = "table-scroll";
+    scrollWrap.appendChild(table);
+    body.appendChild(scrollWrap);
   }catch(err){
     body.innerHTML = '<p class="topic-error">මාතෘකා ලබාගැනීමට නොහැකි විය. නැවත පිටුව load කරන්න.</p>';
   }
@@ -853,6 +948,7 @@ function renderTrend(marksArr){
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { display: true, labels: { boxWidth: 12, font: { size: 11 } } }
       },
@@ -947,6 +1043,7 @@ async function drawGradeChart(myStatus, hasMarks){
     options: {
       indexAxis: "y",
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         title: {
@@ -970,7 +1067,58 @@ async function drawGradeChart(myStatus, hasMarks){
   });
 }
 
+/* normalize a URL the admin entered — if it's missing a scheme, assume https */
+function normalizeUrl(url){
+  const u = (url || "").trim();
+  if (!u) return "#";
+  if (/^https?:\/\//i.test(u)) return u;
+  return "https://" + u;
+}
+
+/* ---------------- Public: external links (institute-wide, no password needed) ----------------
+   Same idea as upcoming_topics — a shared list, not tied to any individual student. */
+async function loadLinks(){
+  const body = document.getElementById("linksBody");
+  try{
+    const url = SUPABASE_URL + LINKS_TABLE + "?select=name,url&order=id.asc";
+    const res = await fetch(url, { headers: sbHeaders() });
+    if (!res.ok) throw new Error("request failed");
+    const rows = await res.json();
+
+    if (rows.length === 0){
+      body.innerHTML = '<p class="topic-empty">තවම සබැඳි එකතු කර නැත.</p>';
+      return;
+    }
+
+    body.innerHTML = "";
+    rows.forEach(r => {
+      const a = document.createElement("a");
+      a.className = "link-item";
+      a.href = normalizeUrl(r.url);
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.innerHTML =
+        '<span class="link-name">' + escapeText(r.name || "") + '</span>' +
+        '<span class="link-go">යන්න ↗</span>';
+      body.appendChild(a);
+    });
+  }catch(err){
+    body.innerHTML = '<p class="topic-error">සබැඳි ලබාගැනීමට නොහැකි විය. නැවත පිටුව load කරන්න.</p>';
+  }
+}
+
+/* ---------------- Tab switching (topics / links) ---------------- */
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+  });
+});
+
 loadTopics();
+loadLinks();
 </script>
 
 </body>
