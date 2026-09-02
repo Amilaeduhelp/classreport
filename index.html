@@ -114,42 +114,47 @@
     color:var(--plum-800);
   }
 
-  /* ---- Upcoming topics table (institute-wide, not per-student) ---- */
-  table.topics-table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:0.92rem;
+  /* ---- Upcoming topics: grouped by institute, centered, single column ---- */
+  .topic-groups{
+    text-align:center;
   }
-  table.topics-table thead th{
-    text-align:left;
-    padding:8px 10px 10px;
-    border-bottom:2px solid var(--paper-line);
-    color:var(--ink-soft);
-    font-weight:600;
-    font-size:0.78rem;
-  }
-  table.topics-table tbody td{
-    padding:10px 10px;
+  .topic-group{
+    padding:20px 0;
     border-bottom:1px solid var(--paper-line);
-    vertical-align:top;
   }
-  table.topics-table tbody tr:last-child td{
+  .topic-group:first-child{
+    padding-top:4px;
+  }
+  .topic-group:last-child{
     border-bottom:none;
+    padding-bottom:4px;
   }
-  .institute-pill{
+  .institute-heading{
     display:inline-block;
-    padding:3px 11px;
+    padding:4px 16px;
     border-radius:20px;
-    font-size:0.8rem;
-    font-weight:600;
     background:var(--pink-soft);
     color:var(--pink);
-    white-space:nowrap;
+    font-family:Georgia,'Noto Serif Sinhala',serif;
+    font-size:1.1rem;
+    font-weight:700;
+    margin-bottom:16px;
   }
-  .topic-date-cell{
-    white-space:nowrap;
+  .topic-entry{
+    margin-bottom:16px;
+  }
+  .topic-entry:last-child{
+    margin-bottom:0;
+  }
+  .topic-entry .topic-date{
+    font-size:0.85rem;
     color:var(--ink-soft);
-    font-size:0.88rem;
+    margin-bottom:3px;
+  }
+  .topic-entry .topic-text{
+    font-size:1.02rem;
+    color:var(--ink);
+    line-height:1.5;
   }
   .topic-empty, .topic-error{
     color:var(--ink-soft);
@@ -579,7 +584,7 @@
 
 </main>
 
-<footer>class_report · amila udawaththa-history-0701551279/0716637804</footer>
+<footer>class_report · Supabase</footer>
 
 <script>
 const SUPABASE_URL = "https://uqgzlaxsnknheoerbfus.supabase.co/rest/v1/";
@@ -672,16 +677,18 @@ function formatTopicDate(dateStr){
   if (!dateStr) return "";
   const d = new Date(dateStr + "T00:00:00");
   if (isNaN(d.getTime())) return dateStr;
-  return SINHALA_MONTHS[d.getMonth()] + " " + d.getDate();
+  return SINHALA_MONTHS[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
 }
 
 /* ---------------- Public: upcoming topics (institute-wide, no password needed) ----------------
    These come from the `upcoming_topics` table — a single shared schedule for all
-   institutes/branches, not tied to any individual student. */
+   institutes/branches, not tied to any individual student. Grouped by institute:
+   institute name once, then each of its (date, topic) pairs stacked below it. */
 async function loadTopics(){
   const body = document.getElementById("topicsBody");
   try{
-    const url = SUPABASE_URL + TOPICS_TABLE + "?select=institute,topic_date,topic&order=topic_date.asc";
+    const url = SUPABASE_URL + TOPICS_TABLE +
+      "?select=institute,topic_date,topic&order=institute.asc,topic_date.asc";
     const res = await fetch(url, { headers: sbHeaders() });
     if (!res.ok) throw new Error("request failed");
     const rows = await res.json();
@@ -691,39 +698,53 @@ async function loadTopics(){
       return;
     }
 
-    const table = document.createElement("table");
-    table.className = "topics-table";
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th>ආයතනය</th>
-          <th>දිනය</th>
-          <th>මාතෘකාව</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    `;
-    const tbody = table.querySelector("tbody");
+    // group consecutive rows by institute (query is already sorted so rows
+    // for the same institute land next to each other, chronologically)
+    const groups = [];
+    const groupIndex = new Map();
     rows.forEach(r => {
-      const tr = document.createElement("tr");
-      const instTd = document.createElement("td");
-      instTd.innerHTML = '<span class="institute-pill">' + escapeText(r.institute || "") + '</span>';
-      const dateTd = document.createElement("td");
-      dateTd.className = "topic-date-cell";
-      dateTd.textContent = formatTopicDate(r.topic_date);
-      const topicTd = document.createElement("td");
-      topicTd.textContent = r.topic || "";
-      tr.appendChild(instTd);
-      tr.appendChild(dateTd);
-      tr.appendChild(topicTd);
-      tbody.appendChild(tr);
+      const inst = (r.institute || "").trim();
+      if (!groupIndex.has(inst)){
+        groupIndex.set(inst, groups.length);
+        groups.push({ institute: inst, entries: [] });
+      }
+      groups[groupIndex.get(inst)].entries.push(r);
+    });
+
+    const wrap = document.createElement("div");
+    wrap.className = "topic-groups";
+
+    groups.forEach(g => {
+      const groupEl = document.createElement("div");
+      groupEl.className = "topic-group";
+
+      const heading = document.createElement("div");
+      heading.className = "institute-heading";
+      heading.textContent = g.institute;
+      groupEl.appendChild(heading);
+
+      g.entries.forEach(e => {
+        const entryEl = document.createElement("div");
+        entryEl.className = "topic-entry";
+
+        const dateEl = document.createElement("div");
+        dateEl.className = "topic-date";
+        dateEl.textContent = formatTopicDate(e.topic_date);
+
+        const textEl = document.createElement("div");
+        textEl.className = "topic-text";
+        textEl.textContent = e.topic || "";
+
+        entryEl.appendChild(dateEl);
+        entryEl.appendChild(textEl);
+        groupEl.appendChild(entryEl);
+      });
+
+      wrap.appendChild(groupEl);
     });
 
     body.innerHTML = "";
-    const scrollWrap = document.createElement("div");
-    scrollWrap.className = "table-scroll";
-    scrollWrap.appendChild(table);
-    body.appendChild(scrollWrap);
+    body.appendChild(wrap);
   }catch(err){
     body.innerHTML = '<p class="topic-error">මාතෘකා ලබාගැනීමට නොහැකි විය. නැවත පිටුව load කරන්න.</p>';
   }
