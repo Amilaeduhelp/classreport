@@ -680,18 +680,34 @@ function formatTopicDate(dateStr){
   return SINHALA_MONTHS[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
 }
 
+/* YYYY-MM-DD (local time) — අද දිනට දින 7කට පෙර.
+   දින ගණන වෙනස් කිරීමට පහත "7" වෙනස් කරන්න. */
+function oneWeekAgoISO(){
+  const d = new Date();
+  d.setDate(d.getDate() - 7);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + day;
+}
+
 /* ---------------- Public: upcoming topics (institute-wide, no password needed) ----------------
    These come from the `upcoming_topics` table — a single shared schedule for all
    institutes/branches, not tied to any individual student. Grouped by institute:
-   institute name once, then each of its (date, topic) pairs stacked below it. */
+   institute name once, then each of its (date, topic) pairs stacked below it.
+   Topics dated earlier than one week ago are not shown. */
 async function loadTopics(){
   const body = document.getElementById("topicsBody");
   try{
+    const cutoff = oneWeekAgoISO();
     const url = SUPABASE_URL + TOPICS_TABLE +
-      "?select=institute,topic_date,topic&order=institute.asc,topic_date.asc";
+      "?select=institute,topic_date,topic" +
+      "&topic_date=gte." + cutoff +
+      "&order=institute.asc,topic_date.asc";
     const res = await fetch(url, { headers: sbHeaders() });
     if (!res.ok) throw new Error("request failed");
-    const rows = await res.json();
+    // extra safety: drop anything older than the cutoff even if it slipped through
+    const rows = (await res.json()).filter(r => r.topic_date && r.topic_date >= cutoff);
 
     if (rows.length === 0){
       body.innerHTML = '<p class="topic-empty">තවම නව මාතෘකා එකතු කර නැත.</p>';
@@ -841,10 +857,8 @@ async function showResult(row){
   const avg = hasHistory ? average(marksArr) : (isNaN(singleMarks) ? 0 : singleMarks);
   const hasAnyMarks = hasHistory || !isNaN(singleMarks);
 
-  // FIX: always derive the grade from the actual average (`avg`), never from
-  // the stored `row.status` column. The stored column can go stale — e.g. it
-  // was set from a single old `marks` value before `test_scores` history
-  // existed — which is exactly why an 81 average could still show "C".
+  // always derive the grade from the actual average (`avg`), never from
+  // the stored `row.status` column, which can go stale.
   const status = hasAnyMarks ? statusFromMarks(avg) : null;
 
   document.getElementById("resSub").textContent = hasHistory
@@ -1096,8 +1110,7 @@ function normalizeUrl(url){
   return "https://" + u;
 }
 
-/* ---------------- Public: external links (institute-wide, no password needed) ----------------
-   Same idea as upcoming_topics — a shared list, not tied to any individual student. */
+/* ---------------- Public: external links (institute-wide, no password needed) ---------------- */
 async function loadLinks(){
   const body = document.getElementById("linksBody");
   try{
