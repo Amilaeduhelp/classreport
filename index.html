@@ -6,473 +6,81 @@
 <title>අමිල උඩවත්ත ඉතිහාසය පන්ති වාර්තාව</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-  :root{
-    --paper:#FAF4EA;
-    --paper-line:#E8DECD;
-    --card:#FFFFFF;
-    --ink:#2A1B2E;
-    --ink-soft:#7A6A72;
-
-    --plum-900:#22071F;
-    --plum-800:#3A0F35;
-    --plum-700:#551A4C;
-
-    --pink:#C81E6D;
-    --pink-soft:#F3C9DE;
-    --orange:#E2711D;
-    --orange-soft:#FBE0C4;
-    --gold:#D9A62E;
-    --gold-soft:#F6E7BE;
-    --sienna:#A8562B;
-    --maroon:#7A1230;
-    --maroon-soft:#F0CBD3;
-  }
-
-  *{box-sizing:border-box;}
-
-  body{
-    margin:0;
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'Noto Sans Sinhala','Iskoola Pota','Yaldevi',system-ui,sans-serif;
-    line-height:1.6;
-  }
-
-  header.hero{
-    background:linear-gradient(135deg,var(--plum-800) 0%, var(--plum-900) 70%);
-    color:#F6EEF4;
-    padding:48px 24px 68px;
-    text-align:left;
-    position:relative;
-    overflow:hidden;
-  }
-  header.hero::after{
-    content:"";
-    position:absolute;
-    right:-60px; top:-60px;
-    width:220px; height:220px;
-    border-radius:50%;
-    background:radial-gradient(circle, rgba(200,30,109,0.35), transparent 70%);
-  }
-  .hero-inner{
-    max-width:680px;
-    margin:0 auto;
-    position:relative;
-  }
-  .hero-eyebrow{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    background:rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.18);
-    padding:5px 12px;
-    border-radius:20px;
-    font-size:0.78rem;
-    color:#E8B7D2;
-    margin-bottom:14px;
-  }
-  .hero-inner h1{
-    font-family:Georgia,'Noto Serif Sinhala',serif;
-    font-size:2.3rem;
-    margin:0 0 6px;
-    letter-spacing:0.2px;
-  }
-  .hero-inner h3{
-    font-weight:400;
-    margin:0 0 10px;
-    color:#D8B9CE;
-    font-size:1.05rem;
-  }
-  .hero-inner p{
-    margin:0;
-    color:#C9B7C4;
-    font-size:0.98rem;
-    max-width:480px;
-  }
-
-  main{
-    max-width:680px;
-    margin:-36px auto 64px;
-    padding:0 24px;
-  }
-
-  section.card{
-    background:var(--card);
-    border:1px solid var(--paper-line);
-    border-radius:10px;
-    padding:26px;
-    margin-bottom:24px;
-    box-shadow:0 6px 20px rgba(58,15,53,0.05);
-  }
-
-  section.card h2{
-    font-family:Georgia,'Noto Serif Sinhala',serif;
-    font-size:1.2rem;
-    margin:0 0 18px;
-    padding-bottom:12px;
-    border-bottom:1px solid var(--paper-line);
-    color:var(--plum-800);
-  }
-
-  /* ---- Upcoming topics: grouped by institute, centered, single column ---- */
-  .topic-groups{
-    text-align:center;
-  }
-  .topic-group{
-    padding:20px 0;
-    border-bottom:1px solid var(--paper-line);
-  }
-  .topic-group:first-child{
-    padding-top:4px;
-  }
-  .topic-group:last-child{
-    border-bottom:none;
-    padding-bottom:4px;
-  }
-  .institute-heading{
-    display:inline-block;
-    padding:4px 16px;
-    border-radius:20px;
-    background:var(--pink-soft);
-    color:var(--pink);
-    font-family:Georgia,'Noto Serif Sinhala',serif;
-    font-size:1.1rem;
-    font-weight:700;
-    margin-bottom:16px;
-  }
-  .topic-entry{
-    margin-bottom:16px;
-  }
-  .topic-entry:last-child{
-    margin-bottom:0;
-  }
-  .topic-entry .topic-date{
-    font-size:0.85rem;
-    color:var(--ink-soft);
-    margin-bottom:3px;
-  }
-  .topic-entry .topic-text{
-    font-size:1.02rem;
-    color:var(--ink);
-    line-height:1.5;
-  }
-  .topic-empty, .topic-error{
-    color:var(--ink-soft);
-    font-size:0.95rem;
-  }
-
-  /* ---- tabs (topics / external links) ---- */
-  .tab-bar{
-    display:flex;
-    gap:8px;
-    margin-bottom:18px;
-    flex-wrap:wrap;
-  }
-  .tab-btn{
-    padding:8px 16px;
-    background:var(--paper);
-    border:1px solid var(--paper-line);
-    border-radius:20px;
-    font-family:inherit;
-    font-size:0.86rem;
-    color:var(--ink-soft);
-    cursor:pointer;
-  }
-  .tab-btn:hover{ background:var(--pink-soft); color:var(--pink); }
-  .tab-btn.active{
-    background:var(--plum-800);
-    border-color:var(--plum-800);
-    color:#F6EEF4;
-  }
-  .tab-panel{ display:none; }
-  .tab-panel.active{ display:block; }
-
-  /* ---- external links list ---- */
-  .link-item{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:14px;
-    padding:12px 14px;
-    border:1px solid var(--paper-line);
-    border-radius:8px;
-    background:#FEFCF8;
-    margin-bottom:10px;
-    text-decoration:none;
-    transition:border-color 0.15s ease;
-  }
-  .link-item:last-child{ margin-bottom:0; }
-  .link-item:hover{ border-color:var(--pink); }
-  .link-name{
-    color:var(--ink);
-    font-size:0.95rem;
-    line-height:1.4;
-  }
-  .link-go{
-    flex-shrink:0;
-    display:inline-flex;
-    align-items:center;
-    gap:4px;
-    padding:5px 12px;
-    border-radius:20px;
-    background:var(--pink-soft);
-    color:var(--pink);
-    font-size:0.8rem;
-    font-weight:600;
-    white-space:nowrap;
-  }
-
-  /* ---- Login form ---- */
-  .field{
-    margin-bottom:14px;
-  }
-  .field label{
-    display:block;
-    font-size:0.88rem;
-    color:var(--ink-soft);
-    margin-bottom:6px;
-  }
-  .field input{
-    width:100%;
-    padding:11px 12px;
-    border:1px solid var(--paper-line);
-    border-radius:6px;
-    font-size:1rem;
-    font-family:inherit;
-    background:#FDFBF6;
-    color:var(--ink);
-  }
-  .field input:focus{
-    outline:2px solid var(--pink);
-    outline-offset:1px;
-  }
-  button.primary{
-    width:100%;
-    padding:12px;
-    background:var(--pink);
-    color:#fff;
-    border:none;
-    border-radius:6px;
-    font-size:1rem;
-    font-family:inherit;
-    cursor:pointer;
-    margin-top:6px;
-  }
-  button.primary:hover{ background:#A5185A; }
-  button.primary:disabled{ opacity:0.6; cursor:default; }
-
-  button.ghost{
-    width:100%;
-    padding:10px;
-    background:transparent;
-    color:var(--ink-soft);
-    border:1px solid var(--paper-line);
-    border-radius:6px;
-    font-family:inherit;
-    font-size:0.92rem;
-    cursor:pointer;
-    margin-top:12px;
-  }
-
-  .login-error{
-    color:var(--maroon);
-    font-size:0.9rem;
-    margin-top:10px;
-    display:none;
-  }
-
-  /* ---- Result: header ---- */
-  .result-top{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:20px;
-    flex-wrap:wrap;
-    margin-bottom:8px;
-  }
-  .result-name{
-    font-family:Georgia,'Noto Serif Sinhala',serif;
-    font-size:1.3rem;
-    color:var(--plum-800);
-  }
-  .result-sub{
-    font-size:0.85rem;
-    color:var(--ink-soft);
-    margin-top:2px;
-  }
-  .result-marks{
-    font-size:2.6rem;
-    font-family:Georgia,'Noto Serif Sinhala',serif;
-    color:var(--ink);
-    margin:2px 0 0;
-  }
-  .result-marks span{
-    font-size:1.1rem;
-    color:var(--ink-soft);
-  }
-
-  .stamp{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    width:62px;
-    height:62px;
-    border-radius:50%;
-    border:3px solid currentColor;
-    font-family:Georgia,'Noto Serif Sinhala',serif;
-    font-size:1.6rem;
-    font-weight:bold;
-    transform:rotate(-8deg);
-    flex-shrink:0;
-  }
-  .stamp.a{ color:var(--pink); }
-  .stamp.b{ color:var(--orange); }
-  .stamp.c{ color:var(--gold); }
-  .stamp.s{ color:var(--sienna); }
-  .stamp.w{ color:var(--maroon); }
-
-  /* ---- KPI grid ---- */
-  .kpi-grid{
-    display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:14px;
-    margin-top:20px;
-  }
-  .kpi{
-    border:1px solid var(--paper-line);
-    border-radius:8px;
-    padding:14px 14px 16px;
-    background:#FEFCF8;
-  }
-  .kpi-icon{
-    width:30px; height:30px;
-    border-radius:8px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:0.95rem;
-    margin-bottom:10px;
-  }
-  .kpi-label{
-    font-size:0.78rem;
-    color:var(--ink-soft);
-    margin-bottom:6px;
-  }
-  .kpi-value{
-    font-size:1.3rem;
-    font-family:Georgia,'Noto Serif Sinhala',serif;
-    color:var(--ink);
-  }
-  .kpi-pill{
-    display:inline-block;
-    margin-top:8px;
-    padding:3px 9px;
-    border-radius:20px;
-    font-size:0.75rem;
-    font-weight:600;
-  }
-  .pill-up{ background:var(--pink-soft); color:var(--pink); }
-  .pill-down{ background:var(--maroon-soft); color:var(--maroon); }
-  .pill-flat{ background:var(--gold-soft); color:#8A6A15; }
-
-  @media (max-width:480px){
-    .kpi-grid{ grid-template-columns:1fr 1fr; }
-  }
-
-  /* ---- Individual test list ---- */
-  .score-list{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin-top:4px;
-  }
-  .score-chip{
-    flex:1 1 90px;
-    border:1px solid var(--paper-line);
-    border-left:4px solid var(--pink);
-    border-radius:6px;
-    padding:9px 12px;
-    background:#FEFCF8;
-  }
-  .score-chip .chip-label{
-    font-size:0.72rem;
-    color:var(--ink-soft);
-    margin-bottom:3px;
-  }
-  .score-chip .chip-marks{
-    font-size:1.1rem;
-    font-family:Georgia,'Noto Serif Sinhala',serif;
-    color:var(--ink);
-  }
-  .score-empty{
-    color:var(--ink-soft);
-    font-size:0.95rem;
-  }
-
-  /* ---- Trend note ---- */
-  .trend-note{
-    margin-top:16px;
-    padding:12px 14px;
-    border-radius:8px;
-    font-size:0.9rem;
-    background:var(--paper);
-    border:1px solid var(--paper-line);
-  }
-
-  .chart-wrap{
-    margin-top:22px;
-    padding-top:18px;
-    border-top:1px solid var(--paper-line);
-  }
-  .chart-wrap p.note{
-    font-size:0.85rem;
-    color:var(--ink-soft);
-    margin:10px 0 0;
-  }
-  .chart-canvas-box{
-    position:relative;
-    width:100%;
-    height:240px;
-  }
-  @media (max-width:480px){
-    .chart-canvas-box{ height:200px; }
-  }
-
-  /* ---- horizontally-scrollable table safety net for narrow phones ---- */
-  .table-scroll{
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-  }
-
-  /* ---- Rank bar ---- */
-  .rank-bar-track{
-    position:relative;
-    height:8px;
-    border-radius:6px;
-    background:var(--paper-line);
-    margin-top:10px;
-  }
-  .rank-bar-fill{
-    position:absolute;
-    left:0; top:0; bottom:0;
-    border-radius:6px;
-    background:linear-gradient(90deg, var(--gold), var(--pink));
-  }
-  .rank-bar-marker{
-    position:absolute;
-    top:-4px;
-    width:2px; height:16px;
-    background:var(--plum-800);
-  }
-
-  footer{
-    text-align:center;
-    color:var(--ink-soft);
-    font-size:0.82rem;
-    padding-bottom:40px;
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    *{ transition:none !important; }
-  }
+:root{--paper:#FAF4EA;--line:#E8DECD;--card:#fff;--ink:#2A1B2E;--soft:#7A6A72;--plum8:#3A0F35;--plum9:#22071F;--pink:#C81E6D;--pink-s:#F3C9DE;--orange:#E2711D;--orange-s:#FBE0C4;--gold:#D9A62E;--gold-s:#F6E7BE;--sienna:#A8562B;--maroon:#7A1230;--maroon-s:#F0CBD3}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Noto Sans Sinhala','Iskoola Pota','Yaldevi',system-ui,sans-serif;line-height:1.6}
+.serif{font-family:Georgia,'Noto Serif Sinhala',serif}
+header.hero{background:linear-gradient(135deg,var(--plum8),var(--plum9) 70%);color:#F6EEF4;padding:48px 24px 44px;position:relative;overflow:hidden}
+header.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(200,30,109,.35),transparent 70%)}
+.hero-inner{max-width:680px;margin:0 auto;position:relative}
+.hero-eyebrow{display:inline-flex;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);padding:5px 12px;border-radius:20px;font-size:.78rem;color:#E8B7D2;margin-bottom:14px}
+.hero-inner h1{font-family:Georgia,'Noto Serif Sinhala',serif;font-size:2.3rem;margin:0 0 6px}
+.hero-inner h3{font-weight:400;margin:0 0 10px;color:#D8B9CE;font-size:1.05rem}
+.hero-inner p{margin:0;color:#C9B7C4;max-width:480px}
+main{max-width:680px;margin:0 auto 64px;padding:32px 24px 0}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:26px;margin-bottom:24px;box-shadow:0 6px 20px rgba(58,15,53,.05)}
+section.card h2{font-family:Georgia,'Noto Serif Sinhala',serif;font-size:1.2rem;margin:0 0 18px;padding-bottom:12px;border-bottom:1px solid var(--line);color:var(--plum8)}
+/* menu */
+.menu{display:grid;gap:10px}
+.menu-btn{display:block;width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:8px;background:#FEFCF8;color:var(--ink);font-family:inherit;font-size:1rem;text-align:left;cursor:pointer;text-decoration:none}
+.menu-btn:hover{border-color:var(--pink);background:var(--pink-s);color:var(--pink)}
+.cta-link{display:block;text-align:center;padding:12px;margin-top:14px;background:var(--pink);color:#fff;border-radius:6px;text-decoration:none;font-weight:600}
+.cta-link:hover{background:#A5185A}
+/* topics */
+.topic-groups{text-align:center}
+.topic-group{padding:20px 0;border-bottom:1px solid var(--line)}
+.topic-group:first-child{padding-top:4px}.topic-group:last-child{border-bottom:none;padding-bottom:4px}
+.institute-heading{display:inline-block;padding:4px 16px;border-radius:20px;background:var(--pink-s);color:var(--pink);font-family:Georgia,'Noto Serif Sinhala',serif;font-size:1.1rem;font-weight:700;margin-bottom:16px}
+.topic-entry{margin-bottom:16px}.topic-entry:last-child{margin-bottom:0}
+.topic-date{font-size:.85rem;color:var(--soft);margin-bottom:3px}
+.topic-text{font-size:1.02rem;line-height:1.5}
+.topic-empty,.topic-error{color:var(--soft);font-size:.95rem}
+/* links */
+.link-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#FEFCF8;margin-bottom:10px;text-decoration:none}
+.link-item:last-child{margin-bottom:0}.link-item:hover{border-color:var(--pink)}
+.link-name{color:var(--ink);font-size:.95rem;line-height:1.4}
+.link-go{flex-shrink:0;padding:5px 12px;border-radius:20px;background:var(--pink-s);color:var(--pink);font-size:.8rem;font-weight:600;white-space:nowrap}
+/* login */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.88rem;color:var(--soft);margin-bottom:6px}
+.field input{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:6px;font-size:1rem;font-family:inherit;background:#FDFBF6;color:var(--ink)}
+.field input:focus{outline:2px solid var(--pink);outline-offset:1px}
+button.primary{width:100%;padding:12px;background:var(--pink);color:#fff;border:none;border-radius:6px;font-size:1rem;font-family:inherit;cursor:pointer;margin-top:6px}
+button.primary:hover{background:#A5185A}button.primary:disabled{opacity:.6;cursor:default}
+button.ghost{width:100%;padding:10px;background:transparent;color:var(--soft);border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:.92rem;cursor:pointer;margin:0 0 24px}
+#resultCard button.ghost{margin:12px 0 0}
+.login-error{color:var(--maroon);font-size:.9rem;margin-top:10px;display:none}
+/* result */
+.result-top{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:8px}
+.result-name{font-family:Georgia,'Noto Serif Sinhala',serif;font-size:1.3rem;color:var(--plum8)}
+.result-sub{font-size:.85rem;color:var(--soft);margin-top:2px}
+.result-marks{font-size:2.6rem;font-family:Georgia,'Noto Serif Sinhala',serif;margin:2px 0 0}
+.result-marks span{font-size:1.1rem;color:var(--soft)}
+.stamp{display:inline-flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:50%;border:3px solid currentColor;font-family:Georgia,serif;font-size:1.6rem;font-weight:bold;transform:rotate(-8deg);flex-shrink:0}
+.stamp.a{color:var(--pink)}.stamp.b{color:var(--orange)}.stamp.c{color:var(--gold)}.stamp.s{color:var(--sienna)}.stamp.w{color:var(--maroon)}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:14px 14px 16px;background:#FEFCF8}
+.kpi-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.kpi-label{font-size:.78rem;color:var(--soft);margin-bottom:6px}
+.kpi-value{font-size:1.3rem;font-family:Georgia,'Noto Serif Sinhala',serif}
+.kpi-pill{display:inline-block;margin-top:8px;padding:3px 9px;border-radius:20px;font-size:.75rem;font-weight:600}
+.pill-up{background:var(--pink-s);color:var(--pink)}.pill-down{background:var(--maroon-s);color:var(--maroon)}.pill-flat{background:var(--gold-s);color:#8A6A15}
+@media(max-width:480px){.kpi-grid{grid-template-columns:1fr 1fr}.chart-canvas-box{height:200px!important}}
+.score-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.score-chip{flex:1 1 90px;border:1px solid var(--line);border-left:4px solid var(--pink);border-radius:6px;padding:9px 12px;background:#FEFCF8}
+.chip-label{font-size:.72rem;color:var(--soft);margin-bottom:3px}
+.chip-marks{font-size:1.1rem;font-family:Georgia,'Noto Serif Sinhala',serif}
+.score-empty{color:var(--soft);font-size:.95rem}
+.trend-note{margin-top:16px;padding:12px 14px;border-radius:8px;font-size:.9rem;background:var(--paper);border:1px solid var(--line)}
+.chart-wrap{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.chart-wrap p.note{font-size:.85rem;color:var(--soft);margin:10px 0 0}
+.chart-canvas-box{position:relative;width:100%;height:240px}
+.rank-bar-track{position:relative;height:8px;border-radius:6px;background:var(--line);margin-top:10px}
+.rank-bar-fill{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,var(--gold),var(--pink))}
+footer{text-align:center;color:var(--soft);font-size:.82rem;padding-bottom:40px}
+button.back-home{color:var(--pink);border-color:var(--pink);font-weight:600}
+button.back-home:hover{background:var(--pink-s)}
+button:focus-visible,a:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -482,50 +90,62 @@
     <span class="hero-eyebrow">පන්ති කාර්ය සාධන වාර්තාව</span>
     <h1>අමිල උඩවත්ත ඉතිහාසය</h1>
     <h3>පන්ති වාර්තාව</h3>
-    <p>ඉදිරි පාඩම් මාතෘකා බැලීමට password අවශ්‍ය නොවේ. ඔබේ ලකුණු බැලීමට පහළින් පිවිසෙන්න.</p>
+    <p>ඔබට අවශ්‍ය කොටස පහතින් තෝරන්න.</p>
   </div>
 </header>
 
 <main>
 
-  <section class="card" id="topicsCard">
-    <div class="tab-bar">
-      <button class="tab-btn active" data-tab="topics">ඉදිරි මාතෘකා</button>
-      <button class="tab-btn" data-tab="links">වැදගත් සබැඳි</button>
-    </div>
-
-    <div id="tab-topics" class="tab-panel active">
-      <div id="topicsBody">
-        <p class="topic-empty">මාතෘකා පූරණය වෙමින්...</p>
-      </div>
-    </div>
-
-    <div id="tab-links" class="tab-panel">
-      <div id="linksBody">
-        <p class="topic-empty">සබැඳි පූරණය වෙමින්...</p>
-      </div>
+  <!-- ප්‍රධාන තේරීම -->
+  <section class="card" id="menuCard">
+    <h2>ඔබට අවශ්‍ය කුමක්ද?</h2>
+    <div class="menu">
+      <button class="menu-btn" data-go="al">උසස් පෙළ සමූහ පන්ති තොරතුරු</button>
+      <button class="menu-btn" data-go="ol">සාමාන්‍ය පෙළ සමූහ පන්ති තොරතුරු</button>
+      <a class="menu-btn" href="https://urceduhelp.github.io/individual-class/">Individual class</a>
+      <a class="menu-btn" href="https://amilaeduhelp.github.io/class/">අලුතෙන් පන්තියකට ඇතුළු වීමට</a>
+      <a class="menu-btn" href="https://urceduhelp.github.io/classtime-for-external-use/">පන්ති කාලසටහන බැලීමට</a>
+      <button class="menu-btn" data-go="links">වැදගත් සබැඳි</button>
     </div>
   </section>
 
-  <section class="card" id="loginCard">
+  <button class="ghost back-home" id="backBtn" style="display:none;">← මුල පිටුවට ආපසු</button>
+
+  <!-- සාමාන්‍ය පෙළ -->
+  <section class="card" id="olCard" style="display:none;">
+    <h2>සාමාන්‍ය පෙළ සමූහ පන්ති තොරතුරු</h2>
+    <p>සාමාන්‍ය පෙළ පන්ති පැවත්වෙන්නේ පුණරීක්ෂණ පන්ති ලෙස පමණි. පෞද්ගලික පන්තියක් (Individual Class) එකක් හෝ සමූහ පන්තියක් සඳහා ගුරුවරයා සම්බන්ධ කරගැනීමට පහතින් පිවිසෙන්න.</p>
+    <a class="cta-link" href="https://amilaeduhelp.github.io/class/">ගුරුවරයා සම්බන්ධ කරගැනීමට පිවිසෙන්න</a>
+  </section>
+
+  <!-- උසස් පෙළ: ඉදිරි මාතෘකා -->
+  <section class="card" id="topicsCard" style="display:none;">
+    <h2>ඉදිරි මාතෘකා</h2>
+    <div id="topicsBody"><p class="topic-empty">මාතෘකා පූරණය වෙමින්...</p></div>
+  </section>
+
+  <!-- වැදගත් සබැඳි -->
+  <section class="card" id="linksCard" style="display:none;">
+    <h2>වැදගත් සබැඳි</h2>
+    <div id="linksBody"><p class="topic-empty">සබැඳි පූරණය වෙමින්...</p></div>
+  </section>
+
+  <!-- උසස් පෙළ: පිවිසුම -->
+  <section class="card" id="loginCard" style="display:none;">
     <h2>ඔබේ ලකුණු බලන්න</h2>
     <form id="loginForm">
-      <div class="field">
-        <label for="nameInput">නම</label>
-        <input type="text" id="nameInput" autocomplete="username" required>
-      </div>
-      <div class="field">
-        <label for="passInput">Password</label>
-        <input type="password" id="passInput" autocomplete="current-password" required>
-      </div>
+      <div class="field"><label for="nameInput">නම</label>
+        <input type="text" id="nameInput" autocomplete="username" required></div>
+      <div class="field"><label for="passInput">Password</label>
+        <input type="password" id="passInput" autocomplete="current-password" required></div>
       <button type="submit" class="primary" id="loginBtn">පිවිසෙන්න</button>
       <p class="login-error" id="loginError">නම හෝ password වැරදියි. නැවත උත්සාහ කරන්න.</p>
     </form>
   </section>
 
+  <!-- ප්‍රතිඵලය -->
   <section class="card" id="resultCard" style="display:none;">
     <h2>ඔබේ ප්‍රතිඵලය</h2>
-
     <div class="result-top">
       <div>
         <div class="result-name" id="resName"></div>
@@ -537,50 +157,44 @@
 
     <div class="kpi-grid">
       <div class="kpi">
-        <div class="kpi-icon" style="background:var(--pink-soft); color:var(--pink);">✓</div>
+        <div class="kpi-icon" style="background:var(--pink-s);color:var(--pink);">✓</div>
         <div class="kpi-label">සම්පූර්ණ කළ පරීක්ෂණ</div>
         <div class="kpi-value" id="kpiCount">—</div>
       </div>
       <div class="kpi">
-        <div class="kpi-icon" style="background:var(--gold-soft); color:#8A6A15;">↗</div>
+        <div class="kpi-icon" style="background:var(--gold-s);color:#8A6A15;">↗</div>
         <div class="kpi-label">ප්‍රවණතාව</div>
         <div class="kpi-value" id="kpiTrendLabel">—</div>
         <span class="kpi-pill" id="kpiTrendPill"></span>
       </div>
       <div class="kpi">
-        <div class="kpi-icon" style="background:var(--orange-soft); color:var(--orange);">#</div>
+        <div class="kpi-icon" style="background:var(--orange-s);color:var(--orange);">#</div>
         <div class="kpi-label">පන්තියේ ස්ථානය</div>
         <div class="kpi-value" id="kpiRank">—</div>
-        <div class="rank-bar-track" id="rankBarTrack" style="display:none;">
-          <div class="rank-bar-fill" id="rankBarFill"></div>
-        </div>
+        <div class="rank-bar-track" id="rankBarTrack" style="display:none;"><div class="rank-bar-fill" id="rankBarFill"></div></div>
       </div>
     </div>
 
     <div class="chart-wrap">
-      <h2 style="border:none; margin-bottom:8px; padding-bottom:0;">පරීක්ෂණ ලකුණු - වෙන් වෙන් වශයෙන්</h2>
-      <div class="score-list" id="scoreList">
-        <p class="score-empty">තවම පරීක්ෂණ ලකුණු ඇතුළත් කර නැත.</p>
-      </div>
+      <h2 style="border:none;margin-bottom:8px;padding-bottom:0;">පරීක්ෂණ ලකුණු - වෙන් වෙන් වශයෙන්</h2>
+      <div class="score-list" id="scoreList"><p class="score-empty">තවම පරීක්ෂණ ලකුණු ඇතුළත් කර නැත.</p></div>
     </div>
 
     <div class="chart-wrap">
-      <div class="chart-canvas-box">
-        <canvas id="trendChart"></canvas>
-      </div>
+      <div class="chart-canvas-box"><canvas id="trendChart"></canvas></div>
       <p class="note" id="trendChartNote">ලකුණු කාලයාන්ර ගමන් කරන ආකාරය සහ ප්‍රවණතා රේඛාව (dashed) පෙන්වයි.</p>
     </div>
     <div class="trend-note" id="trendNote"></div>
 
     <div class="chart-wrap">
-      <div class="chart-canvas-box">
-        <canvas id="gradeChart"></canvas>
-      </div>
+      <div class="chart-canvas-box"><canvas id="gradeChart"></canvas></div>
       <p class="note">ඔබේ සාමාන්‍ය ලකුණු පදනම් කරගත් ශ්‍රේණිය (ඉස්මතු කර ඇති) පන්තියේ අනෙක් සිසුන්ගේ සාමාන්‍ය ලකුණු සමඟ සසඳා ඇත.</p>
     </div>
 
     <button class="ghost" id="logoutBtn">ඉවත් වන්න</button>
   </section>
+
+  <button class="ghost back-home" id="backBtn2" style="display:none;margin:0;">← මුල පිටුවට ආපසු</button>
 
 </main>
 
@@ -590,175 +204,137 @@
 const SUPABASE_URL = "https://uqgzlaxsnknheoerbfus.supabase.co/rest/v1/";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZ3psYXhzbmtuaGVvZXJiZnVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MjM2MTUsImV4cCI6MjA3OTI4MzYxNX0.IYWZ7ukx8J-GJMWy7cMk2BWnmzJmJjjE93yEmJie7nQ";
 const TABLE = "class_report";
-const TOPICS_TABLE = "upcoming_topics"; // shared, institute-wide schedule — not per-student
-const LINKS_TABLE = "external_links"; // shared external-link list — not per-student
-// NOTE: no separate scores table anymore — test history lives in the
-// `test_scores` jsonb column on class_report itself, one array per student row.
+const TOPICS_TABLE = "upcoming_topics";
+const LINKS_TABLE = "external_links";
 
+const $ = id => document.getElementById(id);
 function sbHeaders(){
-  return {
-    "apikey": SUPABASE_ANON_KEY,
-    "Authorization": "Bearer " + SUPABASE_ANON_KEY,
-    "Content-Type": "application/json"
-  };
+  return { "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + SUPABASE_ANON_KEY, "Content-Type": "application/json" };
 }
-
 function escapeText(str){
-  return String(str)
-    .replaceAll("&","&amp;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;");
+  return String(str).replaceAll("&","&amp;").replaceAll('"',"&quot;").replaceAll("<","&lt;").replaceAll(">","&gt;");
 }
 
 const GRADE_ORDER = ["W","S","C","B","A"];
-const GRADE_COLOR = {
-  W: "#7A1230",
-  S: "#A8562B",
-  C: "#D9A62E",
-  B: "#E2711D",
-  A: "#C81E6D"
-};
-const GRADE_LABEL = {
-  W: "W — 40ට අඩු",
-  S: "S — 60ට අඩු",
-  C: "C — 70ට අඩු",
-  B: "B — 80ට අඩු",
-  A: "A — 80 හා ඉහළ"
-};
+const GRADE_COLOR = { W:"#7A1230", S:"#A8562B", C:"#D9A62E", B:"#E2711D", A:"#C81E6D" };
+const GRADE_LABEL = { W:"W — 40ට අඩු", S:"S — 60ට අඩු", C:"C — 70ට අඩු", B:"B — 80ට අඩු", A:"A — 80 හා ඉහළ" };
 
-function statusFromMarks(marks){
-  if (marks < 40) return "W";
-  if (marks < 60) return "S";
-  if (marks < 70) return "C";
-  if (marks < 80) return "B";
+function statusFromMarks(m){
+  if (m < 40) return "W";
+  if (m < 60) return "S";
+  if (m < 70) return "C";
+  if (m < 80) return "B";
   return "A";
 }
+function average(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0) / arr.length : 0; }
 
-function average(arr){
-  if (!arr.length) return 0;
-  return arr.reduce((a,b)=>a+b,0) / arr.length;
-}
-
-/* safely turn whatever comes back from the jsonb column into an array */
 function parseTestScores(raw){
   if (Array.isArray(raw)) return raw;
   if (typeof raw === "string" && raw.trim()){
-    try{
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    }catch(e){
-      return [];
-    }
+    try{ const p = JSON.parse(raw); return Array.isArray(p) ? p : []; }catch(e){ return []; }
   }
   return [];
 }
 
-/* simple least-squares regression, returns {slope, intercept} */
 function linearRegression(values){
   const n = values.length;
-  if (n < 2) return { slope: 0, intercept: values[0] || 0 };
-  let sumX=0, sumY=0, sumXY=0, sumXX=0;
-  values.forEach((y,x)=>{
-    sumX += x; sumY += y; sumXY += x*y; sumXX += x*x;
-  });
-  const denom = (n*sumXX - sumX*sumX) || 1;
-  const slope = (n*sumXY - sumX*sumY) / denom;
-  const intercept = (sumY - slope*sumX) / n;
-  return { slope, intercept };
+  if (n < 2) return { slope:0, intercept: values[0] || 0 };
+  let sx=0, sy=0, sxy=0, sxx=0;
+  values.forEach((y,x)=>{ sx+=x; sy+=y; sxy+=x*y; sxx+=x*x; });
+  const d = (n*sxx - sx*sx) || 1;
+  const slope = (n*sxy - sx*sy) / d;
+  return { slope, intercept: (sy - slope*sx) / n };
 }
 
-const SINHALA_MONTHS = [
-  "ජනවාරි","පෙබරවාරි","මාර්තු","අප්‍රේල්","මැයි","ජූනි",
-  "ජූලි","අගෝස්තු","සැප්තැම්බර්","ඔක්තෝබර්","නොවැම්බර්","දෙසැම්බර්"
-];
-
-function formatTopicDate(dateStr){
-  if (!dateStr) return "";
-  const d = new Date(dateStr + "T00:00:00");
-  if (isNaN(d.getTime())) return dateStr;
+const SINHALA_MONTHS = ["ජනවාරි","පෙබරවාරි","මාර්තු","අප්‍රේල්","මැයි","ජූනි","ජූලි","අගෝස්තු","සැප්තැම්බර්","ඔක්තෝබර්","නොවැම්බර්","දෙසැම්බර්"];
+function formatTopicDate(s){
+  if (!s) return "";
+  const d = new Date(s + "T00:00:00");
+  if (isNaN(d.getTime())) return s;
   return SINHALA_MONTHS[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
 }
-
-/* YYYY-MM-DD (local time) — අද දිනට දින 7කට පෙර.
-   දින ගණන වෙනස් කිරීමට පහත "7" වෙනස් කරන්න. */
+/* අද දිනට දින 7කට පෙර (දින ගණන වෙනස් කිරීමට "7" වෙනස් කරන්න) */
 function oneWeekAgoISO(){
   const d = new Date();
   d.setDate(d.getDate() - 7);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return y + "-" + m + "-" + day;
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 }
 
-/* ---------------- Public: upcoming topics (institute-wide, no password needed) ----------------
-   These come from the `upcoming_topics` table — a single shared schedule for all
-   institutes/branches, not tied to any individual student. Grouped by institute:
-   institute name once, then each of its (date, topic) pairs stacked below it.
-   Topics dated earlier than one week ago are not shown. */
+/* ---------------- ප්‍රධාන තේරීම ---------------- */
+const ALL_VIEW_IDS = ["topicsCard","loginCard","resultCard","olCard","linksCard"];
+const VIEWS = {
+  al:    ["topicsCard","loginCard"],
+  ol:    ["olCard"],
+  links: ["linksCard"]
+};
+const BACK_BTNS = ["backBtn","backBtn2"];
+function hideAllViews(){ ALL_VIEW_IDS.forEach(id => $(id).style.display = "none"); }
+function setBack(show){ BACK_BTNS.forEach(id => $(id).style.display = show ? "block" : "none"); }
+function showView(key, push = true){
+  hideAllViews();
+  VIEWS[key].forEach(id => $(id).style.display = "block");
+  $("menuCard").style.display = "none";
+  setBack(true);
+  if (push){ try{ history.pushState({ v:key }, ""); }catch(e){} }
+  window.scrollTo(0,0);
+}
+function showHome(){
+  $("logoutBtn").click();
+  hideAllViews();
+  $("menuCard").style.display = "block";
+  setBack(false);
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => showView(b.dataset.go)));
+BACK_BTNS.forEach(id => $(id).addEventListener("click", () => {
+  if (history.state && history.state.v) history.back(); else showHome();
+}));
+/* දුරකථනයේ / browser එකේ Back බොත්තමත් මෙහි වැඩ කරයි */
+window.addEventListener("popstate", e => {
+  if (e.state && e.state.v) showView(e.state.v, false); else showHome();
+});
+if (history.state && history.state.v) showView(history.state.v, false);
+
+/* ---------------- ඉදිරි මාතෘකා ---------------- */
 async function loadTopics(){
-  const body = document.getElementById("topicsBody");
+  const body = $("topicsBody");
   try{
     const cutoff = oneWeekAgoISO();
-    const url = SUPABASE_URL + TOPICS_TABLE +
-      "?select=institute,topic_date,topic" +
-      "&topic_date=gte." + cutoff +
-      "&order=institute.asc,topic_date.asc";
+    const url = SUPABASE_URL + TOPICS_TABLE + "?select=institute,topic_date,topic&topic_date=gte." + cutoff + "&order=institute.asc,topic_date.asc";
     const res = await fetch(url, { headers: sbHeaders() });
     if (!res.ok) throw new Error("request failed");
-    // extra safety: drop anything older than the cutoff even if it slipped through
     const rows = (await res.json()).filter(r => r.topic_date && r.topic_date >= cutoff);
+    if (!rows.length){ body.innerHTML = '<p class="topic-empty">තවම නව මාතෘකා එකතු කර නැත.</p>'; return; }
 
-    if (rows.length === 0){
-      body.innerHTML = '<p class="topic-empty">තවම නව මාතෘකා එකතු කර නැත.</p>';
-      return;
-    }
-
-    // group consecutive rows by institute (query is already sorted so rows
-    // for the same institute land next to each other, chronologically)
-    const groups = [];
-    const groupIndex = new Map();
+    const groups = [], idx = new Map();
     rows.forEach(r => {
       const inst = (r.institute || "").trim();
-      if (!groupIndex.has(inst)){
-        groupIndex.set(inst, groups.length);
-        groups.push({ institute: inst, entries: [] });
-      }
-      groups[groupIndex.get(inst)].entries.push(r);
+      if (!idx.has(inst)){ idx.set(inst, groups.length); groups.push({ institute: inst, entries: [] }); }
+      groups[idx.get(inst)].entries.push(r);
     });
 
     const wrap = document.createElement("div");
     wrap.className = "topic-groups";
-
     groups.forEach(g => {
-      const groupEl = document.createElement("div");
-      groupEl.className = "topic-group";
-
-      const heading = document.createElement("div");
-      heading.className = "institute-heading";
-      heading.textContent = g.institute;
-      groupEl.appendChild(heading);
-
+      const ge = document.createElement("div");
+      ge.className = "topic-group";
+      const h = document.createElement("div");
+      h.className = "institute-heading";
+      h.textContent = g.institute;
+      ge.appendChild(h);
       g.entries.forEach(e => {
-        const entryEl = document.createElement("div");
-        entryEl.className = "topic-entry";
-
-        const dateEl = document.createElement("div");
-        dateEl.className = "topic-date";
-        dateEl.textContent = formatTopicDate(e.topic_date);
-
-        const textEl = document.createElement("div");
-        textEl.className = "topic-text";
-        textEl.textContent = e.topic || "";
-
-        entryEl.appendChild(dateEl);
-        entryEl.appendChild(textEl);
-        groupEl.appendChild(entryEl);
+        const en = document.createElement("div");
+        en.className = "topic-entry";
+        const d = document.createElement("div");
+        d.className = "topic-date";
+        d.textContent = formatTopicDate(e.topic_date);
+        const t = document.createElement("div");
+        t.className = "topic-text";
+        t.textContent = e.topic || "";
+        en.appendChild(d); en.appendChild(t); ge.appendChild(en);
       });
-
-      wrap.appendChild(groupEl);
+      wrap.appendChild(ge);
     });
-
     body.innerHTML = "";
     body.appendChild(wrap);
   }catch(err){
@@ -766,41 +342,29 @@ async function loadTopics(){
   }
 }
 
-/* ---------------- Login: name + password ---------------- */
-const loginForm = document.getElementById("loginForm");
-const loginBtn = document.getElementById("loginBtn");
-const loginError = document.getElementById("loginError");
-let trendChartInstance = null;
-let gradeChartInstance = null;
+/* ---------------- පිවිසුම ---------------- */
+const loginBtn = $("loginBtn"), loginError = $("loginError");
+let trendChartInstance = null, gradeChartInstance = null;
 
-loginForm.addEventListener("submit", async (e) => {
+$("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   loginError.style.display = "none";
   loginBtn.disabled = true;
   loginBtn.textContent = "පරීක්ෂා කරමින්...";
-
-  const name = document.getElementById("nameInput").value.trim();
-  const pass = document.getElementById("passInput").value;
-
+  const name = $("nameInput").value.trim();
+  const pass = $("passInput").value;
   try{
-    // pull everything we need for the report in this one query —
-    // marks/status/test_scores all live on the same class_report row.
-    const url = SUPABASE_URL + TABLE +
-      "?select=name,marks,status,test_scores&name=eq." + encodeURIComponent(name) +
-      "&password=eq." + encodeURIComponent(pass);
+    const url = SUPABASE_URL + TABLE + "?select=name,marks,status,test_scores&name=eq." + encodeURIComponent(name) + "&password=eq." + encodeURIComponent(pass);
     const res = await fetch(url, { headers: sbHeaders() });
     if (!res.ok) throw new Error("request failed");
     const rows = await res.json();
-
-    if (rows.length === 0){
+    if (!rows.length){
+      loginError.textContent = "නම හෝ password වැරදියි. නැවත උත්සාහ කරන්න.";
       loginError.style.display = "block";
-      loginBtn.disabled = false;
-      loginBtn.textContent = "පිවිසෙන්න";
       return;
     }
-
     await showResult(rows[0]);
-    document.getElementById("loginCard").style.display = "none";
+    $("loginCard").style.display = "none";
   }catch(err){
     loginError.textContent = "සම්බන්ධතාවයේ දෝෂයක්. නැවත උත්සාහ කරන්න.";
     loginError.style.display = "block";
@@ -810,330 +374,189 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  document.getElementById("resultCard").style.display = "none";
-  document.getElementById("loginCard").style.display = "block";
-  document.getElementById("nameInput").value = "";
-  document.getElementById("passInput").value = "";
+$("logoutBtn").addEventListener("click", () => {
+  $("resultCard").style.display = "none";
+  $("loginCard").style.display = "block";
+  $("nameInput").value = "";
+  $("passInput").value = "";
   loginError.style.display = "none";
   if (trendChartInstance){ trendChartInstance.destroy(); trendChartInstance = null; }
   if (gradeChartInstance){ gradeChartInstance.destroy(); gradeChartInstance = null; }
 });
 
-/* fetch every student's row so we can rank / build the grade distribution */
 async function fetchAllRows(){
-  const url = SUPABASE_URL + TABLE + "?select=name,marks,test_scores";
-  const res = await fetch(url, { headers: sbHeaders() });
+  const res = await fetch(SUPABASE_URL + TABLE + "?select=name,marks,test_scores", { headers: sbHeaders() });
   if (!res.ok) throw new Error("request failed");
   return res.json();
 }
-
-/* a student's average marks: prefer the test_scores history, fall back to
-   the single `marks` column if no per-test history has been entered yet */
 function studentAverage(row){
-  const scores = parseTestScores(row.test_scores);
-  const marksArr = scores.map(s => Number(s.marks)).filter(n => !isNaN(n));
-  if (marksArr.length) return average(marksArr);
+  const arr = parseTestScores(row.test_scores).map(s => Number(s.marks)).filter(n => !isNaN(n));
+  if (arr.length) return average(arr);
   const single = Number(row.marks);
   return isNaN(single) ? 0 : single;
 }
 
 async function showResult(row){
-  document.getElementById("resName").textContent = row.name;
-
+  $("resName").textContent = row.name;
   const scores = parseTestScores(row.test_scores);
-  // sort by test_no / test_date if present, otherwise keep insertion order
   scores.sort((a,b) => {
     if (a.test_no != null && b.test_no != null) return a.test_no - b.test_no;
     if (a.test_date && b.test_date) return new Date(a.test_date) - new Date(b.test_date);
     return 0;
   });
-
   const marksArr = scores.map(s => Number(s.marks)).filter(n => !isNaN(n));
   const hasHistory = marksArr.length > 0;
+  const single = Number(row.marks);
+  const avg = hasHistory ? average(marksArr) : (isNaN(single) ? 0 : single);
+  const hasAny = hasHistory || !isNaN(single);
+  const status = hasAny ? statusFromMarks(avg) : null;
 
-  // fall back to the single marks column when no per-test history exists yet
-  const singleMarks = Number(row.marks);
-  const avg = hasHistory ? average(marksArr) : (isNaN(singleMarks) ? 0 : singleMarks);
-  const hasAnyMarks = hasHistory || !isNaN(singleMarks);
-
-  // always derive the grade from the actual average (`avg`), never from
-  // the stored `row.status` column, which can go stale.
-  const status = hasAnyMarks ? statusFromMarks(avg) : null;
-
-  document.getElementById("resSub").textContent = hasHistory
-    ? "සියලු පරීක්ෂණ " + marksArr.length + "ක සාමාන්‍යය පදනම් කරගෙන"
-    : (hasAnyMarks ? "අවසන් වාර්තාගත ලකුණු" : "තවම ලකුණු ඇතුළත් කර නැත");
-  document.getElementById("resMarks").innerHTML =
-    (hasAnyMarks ? avg.toFixed(1) : "—") + '<span> / 100' + (hasHistory ? " (සාමාන්‍යය)" : "") + '</span>';
-
-  const stampEl = document.getElementById("resStamp");
-  stampEl.textContent = hasAnyMarks ? status : "-";
-  stampEl.className = "stamp " + (hasAnyMarks ? status.toLowerCase() : "");
-
-  document.getElementById("kpiCount").textContent = hasHistory ? (marksArr.length + " පරීක්ෂණ") : "—";
+  $("resSub").textContent = hasHistory ? "සියලු පරීක්ෂණ " + marksArr.length + "ක සාමාන්‍යය පදනම් කරගෙන"
+    : (hasAny ? "අවසන් වාර්තාගත ලකුණු" : "තවම ලකුණු ඇතුළත් කර නැත");
+  $("resMarks").innerHTML = (hasAny ? avg.toFixed(1) : "—") + '<span> / 100' + (hasHistory ? " (සාමාන්‍යය)" : "") + '</span>';
+  const stamp = $("resStamp");
+  stamp.textContent = hasAny ? status : "-";
+  stamp.className = "stamp " + (hasAny ? status.toLowerCase() : "");
+  $("kpiCount").textContent = hasHistory ? (marksArr.length + " පරීක්ෂණ") : "—";
 
   renderScoreList(scores);
   renderTrend(marksArr);
-  await renderRank(row.name, avg, hasAnyMarks);
-
-  document.getElementById("resultCard").style.display = "block";
-
-  await drawGradeChart(status, hasAnyMarks);
+  await renderRank(row.name, hasAny);
+  $("resultCard").style.display = "block";
+  await drawGradeChart(status, hasAny);
 }
 
 function renderScoreList(scores){
-  const wrap = document.getElementById("scoreList");
-  if (!scores.length){
-    wrap.innerHTML = '<p class="score-empty">තවම පරීක්ෂණ ලකුණු ඇතුළත් කර නැත.</p>';
-    return;
-  }
+  const wrap = $("scoreList");
+  if (!scores.length){ wrap.innerHTML = '<p class="score-empty">තවම පරීක්ෂණ ලකුණු ඇතුළත් කර නැත.</p>'; return; }
   wrap.innerHTML = "";
-  scores.forEach((s, i) => {
+  scores.forEach((s,i) => {
+    const marks = Number(s.marks), g = statusFromMarks(marks);
     const chip = document.createElement("div");
     chip.className = "score-chip";
-    const marks = Number(s.marks);
-    const g = statusFromMarks(marks);
     chip.style.borderLeftColor = GRADE_COLOR[g];
-    const label = s.test_no ? ("පරීක්ෂණය " + s.test_no) : ("පරීක්ෂණය " + (i+1));
-    const dateStr = s.test_date ? new Date(s.test_date).toLocaleDateString("si-LK") : "";
-    chip.innerHTML =
-      '<div class="chip-label">' + label + (dateStr ? " · " + dateStr : "") + '</div>' +
-      '<div class="chip-marks" style="color:' + GRADE_COLOR[g] + '">' + marks + '</div>';
+    const label = "පරීක්ෂණය " + (s.test_no || (i+1));
+    const ds = s.test_date ? new Date(s.test_date).toLocaleDateString("si-LK") : "";
+    chip.innerHTML = '<div class="chip-label">' + label + (ds ? " · " + ds : "") + '</div><div class="chip-marks" style="color:' + GRADE_COLOR[g] + '">' + marks + '</div>';
     wrap.appendChild(chip);
   });
 }
 
 function renderTrend(marksArr){
-  const trendLabelEl = document.getElementById("kpiTrendLabel");
-  const trendPillEl = document.getElementById("kpiTrendPill");
-  const trendNoteEl = document.getElementById("trendNote");
-  const chartNoteEl = document.getElementById("trendChartNote");
-
+  const labelEl = $("kpiTrendLabel"), pillEl = $("kpiTrendPill"), noteEl = $("trendNote"), cnEl = $("trendChartNote");
   if (marksArr.length < 2){
-    trendLabelEl.textContent = "—";
-    trendPillEl.style.display = "none";
-    trendNoteEl.textContent = "ප්‍රවණතාවක් ගණනය කිරීමට අවම වශයෙන් පරීක්ෂණ 2ක් අවශ්‍යයි.";
-    chartNoteEl.textContent = "ලකුණු ප්‍රස්තාරය සඳහා තවත් පරීක්ෂණ ලකුණු ඇතුළත් විය යුතුය.";
+    labelEl.textContent = "—";
+    pillEl.style.display = "none";
+    noteEl.textContent = "ප්‍රවණතාවක් ගණනය කිරීමට අවම වශයෙන් පරීක්ෂණ 2ක් අවශ්‍යයි.";
+    cnEl.textContent = "ලකුණු ප්‍රස්තාරය සඳහා තවත් පරීක්ෂණ ලකුණු ඇතුළත් විය යුතුය.";
     if (trendChartInstance){ trendChartInstance.destroy(); trendChartInstance = null; }
     return;
   }
-
   const { slope, intercept } = linearRegression(marksArr);
-  const UP_THRESHOLD = 0.4;
-  const DOWN_THRESHOLD = -0.4;
-
-  let label, pillClass, arrow, noteText;
-  if (slope > UP_THRESHOLD){
-    label = "වර්ධනය වෙමින්";
-    pillClass = "pill-up";
-    arrow = "↗";
-    noteText = "සිසුවාගේ ලකුණු කාලයත් සමඟ ක්‍රමයෙන් ඉහළ යමින් පවතී. සාමාන්‍යයෙන් සෑම පරීක්ෂණයකදීම ලකුණු " +
-      Math.abs(slope).toFixed(1) + "කින් පමණ වැඩි වෙමින් ඇත — මේ ප්‍රගතිය දිගටම පවත්වා ගැනීම දිරිමත් කරන්න.";
-  } else if (slope < DOWN_THRESHOLD){
-    label = "බිඳ වැටෙමින්";
-    pillClass = "pill-down";
-    arrow = "↘";
-    noteText = "සිසුවාගේ ලකුණු කාලයත් සමඟ ක්‍රමයෙන් පහළ යමින් පවතී. සාමාන්‍යයෙන් සෑම පරීක්ෂණයකදීම ලකුණු " +
-      Math.abs(slope).toFixed(1) + "කින් පමණ අඩු වෙමින් ඇත — අමතර සහාය හෝ පුනරීක්ෂණයක් අවශ්‍ය විය හැක.";
+  let label, pillClass, arrow, note;
+  if (slope > 0.4){
+    label = "වර්ධනය වෙමින්"; pillClass = "pill-up"; arrow = "↗";
+    note = "සිසුවාගේ ලකුණු කාලයත් සමඟ ක්‍රමයෙන් ඉහළ යමින් පවතී. සාමාන්‍යයෙන් සෑම පරීක්ෂණයකදීම ලකුණු " + Math.abs(slope).toFixed(1) + "කින් පමණ වැඩි වෙමින් ඇත — මේ ප්‍රගතිය දිගටම පවත්වා ගැනීම දිරිමත් කරන්න.";
+  } else if (slope < -0.4){
+    label = "බිඳ වැටෙමින්"; pillClass = "pill-down"; arrow = "↘";
+    note = "සිසුවාගේ ලකුණු කාලයත් සමඟ ක්‍රමයෙන් පහළ යමින් පවතී. සාමාන්‍යයෙන් සෑම පරීක්ෂණයකදීම ලකුණු " + Math.abs(slope).toFixed(1) + "කින් පමණ අඩු වෙමින් ඇත — අමතර සහාය හෝ පුනරීක්ෂණයක් අවශ්‍ය විය හැක.";
   } else {
-    label = "ස්ථාවරයි";
-    pillClass = "pill-flat";
-    arrow = "→";
-    noteText = "සිසුවාගේ ලකුණු තරමක් ස්ථාවරව පවතී — කැපී පෙනෙන වර්ධනයක් හෝ පහත වැටීමක් නොමැත.";
+    label = "ස්ථාවරයි"; pillClass = "pill-flat"; arrow = "→";
+    note = "සිසුවාගේ ලකුණු තරමක් ස්ථාවරව පවතී — කැපී පෙනෙන වර්ධනයක් හෝ පහත වැටීමක් නොමැත.";
   }
+  labelEl.textContent = label;
+  pillEl.style.display = "inline-block";
+  pillEl.className = "kpi-pill " + pillClass;
+  pillEl.textContent = arrow;
+  noteEl.textContent = note;
+  cnEl.textContent = "ලකුණු කාලයාන්තරයේ ගමන් කරන ආකාරය (solid) සහ ප්‍රවණතා රේඛාව (dashed) පෙන්වයි.";
 
-  trendLabelEl.textContent = label;
-  trendPillEl.style.display = "inline-block";
-  trendPillEl.className = "kpi-pill " + pillClass;
-  trendPillEl.textContent = arrow;
-  trendNoteEl.textContent = noteText;
-  chartNoteEl.textContent = "ලකුණු කාලයාන්තරයේ ගමන් කරන ආකාරය (solid) සහ ප්‍රවණතා රේඛාව (dashed) පෙන්වයි.";
-
-  const labels = marksArr.map((_, i) => "P" + (i+1));
-  const trendData = marksArr.map((_, i) => Math.max(0, Math.min(100, slope*i + intercept)));
-
-  const ctx = document.getElementById("trendChart").getContext("2d");
-  if (trendChartInstance){ trendChartInstance.destroy(); }
-
-  trendChartInstance = new Chart(ctx, {
+  const trendData = marksArr.map((_,i) => Math.max(0, Math.min(100, slope*i + intercept)));
+  if (trendChartInstance) trendChartInstance.destroy();
+  trendChartInstance = new Chart($("trendChart").getContext("2d"), {
     type: "line",
     data: {
-      labels: labels,
+      labels: marksArr.map((_,i) => "P" + (i+1)),
       datasets: [
-        {
-          label: "ලකුණු",
-          data: marksArr,
-          borderColor: "#C81E6D",
-          backgroundColor: "rgba(200,30,109,0.12)",
-          pointBackgroundColor: "#C81E6D",
-          fill: true,
-          tension: 0.3
-        },
-        {
-          label: "ප්‍රවණතාව",
-          data: trendData,
-          borderColor: "#7A6A72",
-          borderDash: [6,4],
-          pointRadius: 0,
-          fill: false,
-          tension: 0
-        }
+        { label:"ලකුණු", data:marksArr, borderColor:"#C81E6D", backgroundColor:"rgba(200,30,109,0.12)", pointBackgroundColor:"#C81E6D", fill:true, tension:0.3 },
+        { label:"ප්‍රවණතාව", data:trendData, borderColor:"#7A6A72", borderDash:[6,4], pointRadius:0, fill:false, tension:0 }
       ]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: true, labels: { boxWidth: 12, font: { size: 11 } } }
-      },
-      scales: {
-        y: { min: 0, max: 100, grid: { color: "#E8DECD" } },
-        x: { grid: { display: false } }
-      }
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:true, labels:{ boxWidth:12, font:{ size:11 } } } },
+      scales:{ y:{ min:0, max:100, grid:{ color:"#E8DECD" } }, x:{ grid:{ display:false } } }
     }
   });
 }
 
-async function renderRank(name, myAvg, hasMarks){
-  const rankValEl = document.getElementById("kpiRank");
-  const trackEl = document.getElementById("rankBarTrack");
-  const fillEl = document.getElementById("rankBarFill");
-
-  if (!hasMarks){
-    rankValEl.textContent = "—";
-    trackEl.style.display = "none";
-    return;
-  }
-
+async function renderRank(name, hasMarks){
+  const valEl = $("kpiRank"), track = $("rankBarTrack"), fill = $("rankBarFill");
+  const none = () => { valEl.textContent = "—"; track.style.display = "none"; };
+  if (!hasMarks) return none();
   try{
-    const rows = await fetchAllRows();
-    const averages = rows
-      .map(r => ({ name: r.name, avg: studentAverage(r) }))
-      .filter(s => s.name);
-
-    if (!averages.length){
-      rankValEl.textContent = "—";
-      trackEl.style.display = "none";
-      return;
-    }
-
-    averages.sort((a,b) => b.avg - a.avg);
-    const total = averages.length;
-    const idx = averages.findIndex(s => s.name === name);
-    const rank = idx >= 0 ? idx + 1 : null;
-
-    if (rank === null){
-      rankValEl.textContent = "—";
-      trackEl.style.display = "none";
-      return;
-    }
-
-    const percentile = Math.round((1 - (rank - 1) / total) * 100);
-    rankValEl.textContent = rank + " / " + total;
-    trackEl.style.display = "block";
-    const fillPct = Math.round((rank / total) * 100);
-    fillEl.style.width = fillPct + "%";
-    trackEl.title = "ඉහළම " + percentile + "% තුළ";
-  }catch(err){
-    rankValEl.textContent = "—";
-    trackEl.style.display = "none";
-  }
+    const list = (await fetchAllRows()).map(r => ({ name:r.name, avg:studentAverage(r) })).filter(s => s.name);
+    if (!list.length) return none();
+    list.sort((a,b) => b.avg - a.avg);
+    const idx = list.findIndex(s => s.name === name);
+    if (idx < 0) return none();
+    const rank = idx + 1, total = list.length;
+    valEl.textContent = rank + " / " + total;
+    track.style.display = "block";
+    fill.style.width = Math.round(rank / total * 100) + "%";
+    track.title = "ඉහළම " + Math.round((1 - (rank-1)/total) * 100) + "% තුළ";
+  }catch(err){ none(); }
 }
 
-/* ---------------- Class-wide grade distribution chart (based on each student's average) ---------------- */
 async function drawGradeChart(myStatus, hasMarks){
   const counts = { W:0, S:0, C:0, B:0, A:0 };
   try{
-    const rows = await fetchAllRows();
-    rows.forEach(r => {
+    (await fetchAllRows()).forEach(r => {
       if (!r.name) return;
-      const avg = studentAverage(r);
-      const st = statusFromMarks(avg);
-      counts[st] = (counts[st] || 0) + 1;
+      counts[statusFromMarks(studentAverage(r))]++;
     });
-  }catch(err){
-    /* if this fails, chart just shows zeros */
-  }
-
-  const ctx = document.getElementById("gradeChart").getContext("2d");
-  if (gradeChartInstance){ gradeChartInstance.destroy(); }
-
-  gradeChartInstance = new Chart(ctx, {
+  }catch(err){}
+  if (gradeChartInstance) gradeChartInstance.destroy();
+  const mine = g => hasMarks && g === myStatus;
+  gradeChartInstance = new Chart($("gradeChart").getContext("2d"), {
     type: "bar",
     data: {
       labels: GRADE_ORDER.map(g => GRADE_LABEL[g]),
       datasets: [{
         data: GRADE_ORDER.map(g => counts[g]),
-        backgroundColor: GRADE_ORDER.map(g =>
-          (hasMarks && g === myStatus) ? GRADE_COLOR[g] : GRADE_COLOR[g] + "55"
-        ),
-        borderColor: GRADE_ORDER.map(g =>
-          (hasMarks && g === myStatus) ? GRADE_COLOR[g] : "transparent"
-        ),
-        borderWidth: GRADE_ORDER.map(g => (hasMarks && g === myStatus) ? 2 : 0),
+        backgroundColor: GRADE_ORDER.map(g => mine(g) ? GRADE_COLOR[g] : GRADE_COLOR[g] + "55"),
+        borderColor: GRADE_ORDER.map(g => mine(g) ? GRADE_COLOR[g] : "transparent"),
+        borderWidth: GRADE_ORDER.map(g => mine(g) ? 2 : 0),
         borderRadius: 4
       }]
     },
     options: {
-      indexAxis: "y",
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        title: {
-          display: true,
-          text: "පන්තියේ සාමාන්‍ය ලකුණු බෙදාහැරීම (සිසුවෙකුට එක් තීරුවක්)",
-          font: { size: 13 },
-          color: "#2A1B2E"
-        }
-      },
-      scales: {
-        x: {
-          beginAtZero: true,
-          ticks: { precision: 0 },
-          grid: { color: "#E8DECD" }
-        },
-        y: {
-          grid: { display: false }
-        }
-      }
+      indexAxis:"y", responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false }, title:{ display:true, text:"පන්තියේ සාමාන්‍ය ලකුණු බෙදාහැරීම (සිසුවෙකුට එක් තීරුවක්)", font:{ size:13 }, color:"#2A1B2E" } },
+      scales:{ x:{ beginAtZero:true, ticks:{ precision:0 }, grid:{ color:"#E8DECD" } }, y:{ grid:{ display:false } } }
     }
   });
 }
 
-/* normalize a URL the admin entered — if it's missing a scheme, assume https */
+/* ---------------- වැදගත් සබැඳි ---------------- */
 function normalizeUrl(url){
   const u = (url || "").trim();
   if (!u) return "#";
-  if (/^https?:\/\//i.test(u)) return u;
-  return "https://" + u;
+  return /^https?:\/\//i.test(u) ? u : "https://" + u;
 }
-
-/* ---------------- Public: external links (institute-wide, no password needed) ---------------- */
 async function loadLinks(){
-  const body = document.getElementById("linksBody");
+  const body = $("linksBody");
   try{
-    const url = SUPABASE_URL + LINKS_TABLE + "?select=name,url&order=id.asc";
-    const res = await fetch(url, { headers: sbHeaders() });
+    const res = await fetch(SUPABASE_URL + LINKS_TABLE + "?select=name,url&order=id.asc", { headers: sbHeaders() });
     if (!res.ok) throw new Error("request failed");
     const rows = await res.json();
-
-    if (rows.length === 0){
-      body.innerHTML = '<p class="topic-empty">තවම සබැඳි එකතු කර නැත.</p>';
-      return;
-    }
-
+    if (!rows.length){ body.innerHTML = '<p class="topic-empty">තවම සබැඳි එකතු කර නැත.</p>'; return; }
     body.innerHTML = "";
     rows.forEach(r => {
       const a = document.createElement("a");
       a.className = "link-item";
       a.href = normalizeUrl(r.url);
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      a.innerHTML =
-        '<span class="link-name">' + escapeText(r.name || "") + '</span>' +
-        '<span class="link-go">යන්න ↗</span>';
+      a.innerHTML = '<span class="link-name">' + escapeText(r.name || "") + '</span><span class="link-go">යන්න ↗</span>';
       body.appendChild(a);
     });
   }catch(err){
@@ -1141,19 +564,8 @@ async function loadLinks(){
   }
 }
 
-/* ---------------- Tab switching (topics / links) ---------------- */
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
-  });
-});
-
 loadTopics();
 loadLinks();
 </script>
-
 </body>
 </html>
