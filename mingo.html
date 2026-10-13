@@ -15,8 +15,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{background:#e9e4e8;font-family:'Noto Sans Sinhala','Noto Serif',system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center}
-.app{width:100%;max-width:480px;height:100dvh;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden;
-     border:1px solid var(--crimson)}
+.app{width:100%;max-width:480px;height:100dvh;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden;border:1px solid var(--crimson)}
 @media(min-width:520px){.app{height:min(900px,96dvh);margin:2dvh 0;border-radius:var(--radius)}}
 .brand{font-family:'Anton',Impact,sans-serif;color:var(--crimson);letter-spacing:.5px}
 .hidden{display:none!important}
@@ -37,7 +36,7 @@ input,textarea{font:inherit;outline:none;border:0;color:var(--ink)}
 #home{flex:1;display:flex;flex-direction:column;min-height:0}
 .top{padding:14px 16px 4px;text-align:center;position:relative}
 .top h1{font-size:30px}
-.top .me{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--grey);text-align:right;line-height:1.3}
+.top .me{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--grey);text-align:right;line-height:1.3;max-width:34%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .top .me button{color:var(--crimson);font-weight:600;font-size:11px}
 .search{margin:8px 20px 12px;background:var(--panel);border-radius:999px;display:flex;align-items:center;gap:10px;padding:0 18px;height:46px}
 .search svg{flex:none}
@@ -50,6 +49,7 @@ input,textarea{font:inherit;outline:none;border:0;color:var(--ink)}
 .note-b{height:230px;overflow-y:auto;padding:12px 16px}
 .note-b .empty{color:var(--grey);text-align:center;margin-top:90px;font-size:14px}
 .n-item{background:#fff;border-radius:16px;padding:10px 14px;margin-bottom:10px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.n-author{font-family:'Anton',Impact,sans-serif;color:var(--crimson);font-size:16px;letter-spacing:.3px;display:block;margin-bottom:2px}
 .n-meta{display:flex;justify-content:space-between;gap:8px;font-family:'Noto Serif',serif;font-size:11.5px;color:var(--grey);margin-top:6px}
 .n-act button{color:var(--crimson);font-weight:600;margin-left:10px;font-size:12px}
 
@@ -57,12 +57,10 @@ input,textarea{font:inherit;outline:none;border:0;color:var(--ink)}
 .contact:active{background:var(--crimson-l)}
 .dot{width:19px;height:19px;border-radius:50%;background:var(--grey);flex:none}
 .contact.unread .dot{background:var(--crimson)}
-.c-main{flex:1;min-width:0}
-.c-name{font-family:'Anton',Impact,sans-serif;font-size:21px;color:var(--grey);line-height:1.15;display:flex;align-items:center;gap:8px}
+.c-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.c-name{font-family:'Anton',Impact,sans-serif;font-size:21px;color:var(--grey);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .contact.unread .c-name{color:var(--crimson)}
-.tag{font-family:'Noto Sans Sinhala',sans-serif;font-size:10px;background:var(--crimson-l);color:var(--crimson);border-radius:999px;padding:1px 8px}
 .c-time{font-family:'Noto Serif',serif;font-size:15px;color:var(--grey);white-space:pre}
-.c-prev{font-size:12.5px;color:var(--grey);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 .badge{background:var(--crimson);color:#fff;border-radius:999px;font-size:12px;min-width:22px;height:22px;display:grid;place-items:center;padding:0 6px;font-weight:600}
 .none{color:var(--grey);text-align:center;padding:24px;font-size:14px}
 
@@ -70,12 +68,13 @@ input,textarea{font:inherit;outline:none;border:0;color:var(--ink)}
 #chat{flex:1;display:flex;flex-direction:column;min-height:0;background:#efe9ee}
 .chat-h{background:var(--crimson);color:#fff;display:flex;align-items:center;gap:12px;padding:12px 14px}
 .chat-h .back{font-size:24px;line-height:1;padding:0 6px}
-.chat-h .t{font-family:'Anton',Impact,sans-serif;font-size:22px;letter-spacing:.4px}
+.chat-h .t{font-family:'Anton',Impact,sans-serif;font-size:22px;letter-spacing:.4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msgs{flex:1;overflow-y:auto;padding:14px 14px 8px;display:flex;flex-direction:column;gap:6px;min-height:0}
 .day{align-self:center;background:rgba(0,0,0,.08);color:#555;font-size:11.5px;border-radius:999px;padding:3px 12px;margin:8px 0 4px;font-family:'Noto Serif',serif}
 .m{max-width:80%;padding:8px 12px 6px;border-radius:18px;font-size:15px;line-height:1.45;word-break:break-word;white-space:pre-wrap;box-shadow:0 1px 1px rgba(0,0,0,.08)}
 .m.in{align-self:flex-start;background:#fff;border-bottom-left-radius:5px}
 .m.out{align-self:flex-end;background:var(--crimson);color:#fff;border-bottom-right-radius:5px}
+.m .who{display:block;font-family:'Anton',Impact,sans-serif;font-size:14px;letter-spacing:.3px;margin-bottom:2px;opacity:.85}
 .m .mt{display:flex;justify-content:flex-end;gap:8px;font-family:'Noto Serif',serif;font-size:10.5px;opacity:.7;margin-top:3px}
 .m .acts{display:flex;gap:12px;margin-top:4px;justify-content:flex-end;font-size:11.5px;font-weight:600}
 .m.in .acts button{color:var(--crimson)}
@@ -104,7 +103,7 @@ input,textarea{font:inherit;outline:none;border:0;color:var(--ink)}
   <section id="login">
     <h1 class="brand">Mingo</h1>
     <p class="sub">ඔබේ නමත් මුරපදයත් ඇතුළත් කරන්න</p>
-    <input class="field" id="lname" placeholder="නම (Username)" autocomplete="username">
+    <input class="field" id="lname" placeholder="නම (Username)" autocomplete="username" autocapitalize="off">
     <input class="field" id="lpass" type="password" placeholder="මුරපදය" autocomplete="current-password">
     <div class="err" id="lerr"></div>
     <button class="btn" id="lbtn">ඇතුල් වන්න</button>
@@ -113,7 +112,7 @@ input,textarea{font:inherit;outline:none;border:0;color:var(--ink)}
   <!-- HOME -->
   <section id="home" class="hidden">
     <div class="top">
-      <span class="sync" id="sync" title="සජීවී"></span>
+      <span class="sync" id="sync"></span>
       <h1 class="brand">Mingo</h1>
       <div class="me"><span id="meName"></span><br><button id="logout">ඉවත් වන්න</button></div>
     </div>
@@ -123,7 +122,7 @@ input,textarea{font:inherit;outline:none;border:0;color:var(--ink)}
     </label>
     <div class="scroll">
       <div class="note">
-        <div class="note-h">Common Note<button id="addNote" class="hidden" title="නව සටහනක්">+</button></div>
+        <div class="note-h">Common Note<button id="addNote" title="නව සටහනක්">+</button></div>
         <div class="note-b" id="notes"></div>
       </div>
       <div id="contacts"></div>
@@ -145,22 +144,24 @@ input,textarea{font:inherit;outline:none;border:0;color:var(--ink)}
 
 <script>
 /* =================== CONFIG =================== */
-const SUPABASE_URL = 'https://uqgzlaxsnknheoerbfus.supabase.co';
+const SUPABASE_URL  = 'https://uqgzlaxsnknheoerbfus.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVxZ3psYXhzbmtuaGVvZXJiZnVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5MjM2MTUsImV4cCI6MjA3OTI4MzYxNX0.IYWZ7ukx8J-GJMWy7cMk2BWnmzJmJjjE93yEmJie7nQ';
 const REFRESH_MS = 30000;   // සෑම තත්පර 30කට වරක් නැවුම් වේ
+const BAD_LOGIN  = 'නම හෝ මුරපදය වැරදියි';
 
 /* =================== HELPERS =================== */
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let creds = null;      // {name, password, id, admin}
-let peer = null;       // {id, name}
+let creds = null;      // සිසුවා  {name, password, id}
+let sess  = null;      // කළමනාකරු සැසිය {access, refresh, exp, email}
+let peer  = null;      // විවෘත සංවාදය
 let contactsCache = [], notesCache = [], msgsCache = [];
 let timer = null;
 
-async function rpc(fn, args = {}) {
+async function rpc(fn, args = {}, token) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
     method: 'POST',
-    headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + SUPABASE_ANON, 'Content-Type': 'application/json' },
+    headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + (token || SUPABASE_ANON), 'Content-Type': 'application/json' },
     body: JSON.stringify(args)
   });
   const data = await r.json().catch(() => null);
@@ -168,6 +169,27 @@ async function rpc(fn, args = {}) {
   return data;
 }
 const A = () => ({ p_name: creds.name, p_password: creds.password });
+
+/* --- Supabase Auth (සැඟවුණු පිවිසුම) --- */
+async function authCall(grant, body) {
+  const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=${grant}`, {
+    method: 'POST', headers: { apikey: SUPABASE_ANON, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+  });
+  const d = await r.json().catch(() => null);
+  if (!r.ok || !d || !d.access_token) throw new Error(BAD_LOGIN);
+  return d;
+}
+function keepSession(d, email) {
+  sess = { access: d.access_token, refresh: d.refresh_token, exp: Date.now() + (d.expires_in || 3600) * 1000, email: email || (sess && sess.email) || '' };
+  try { sessionStorage.setItem('mingo_s', JSON.stringify(sess)); } catch(e){}
+}
+async function arpc(fn, args = {}) {
+  if (Date.now() > sess.exp - 60000) {
+    try { keepSession(await authCall('refresh_token', { refresh_token: sess.refresh })); }
+    catch (e) { doLogout(); throw new Error('සැසිය අවසන් විය'); }
+  }
+  return rpc(fn, args, sess.access);
+}
 
 function pad(n){return String(n).padStart(2,'0')}
 function fmtTime(d){ let h=d.getHours(), ap=h>=12?'pm':'am'; h=h%12||12; return `${pad(h)}.${pad(d.getMinutes())}${ap}`; }
@@ -180,35 +202,52 @@ function show(id){ ['login','home','chat'].forEach(s=>$(s).classList.toggle('hid
 async function doLogin(name, password, silent) {
   $('lbtn').disabled = true; $('lerr').textContent = '';
   try {
-    const rows = await rpc('app_login', { p_name: name, p_password: password });
-    const u = rows[0];
-    creds = { name, password, id: u.user_id, admin: u.user_is_admin };
-    try { localStorage.setItem('mingo_cred', JSON.stringify({ name, password })); } catch(e){}
-    $('meName').textContent = u.user_name + (u.user_is_admin ? ' (Admin)' : '');
-    $('addNote').classList.toggle('hidden', !u.user_is_admin);
+    if (name.includes('@')) {                       // email එකක් නම් → Supabase Auth
+      keepSession(await authCall('password', { email: name, password }), name);
+      let ok = false;
+      try { ok = await rpc('admin_check', {}, sess.access); } catch(e){}
+      if (!ok) { sess = null; try { sessionStorage.removeItem('mingo_s'); } catch(e){} throw new Error(BAD_LOGIN); }
+      creds = null;
+      $('meName').textContent = '';
+      $('addNote').classList.add('hidden');
+    } else {                                        // සාමාන්‍ය සිසුවා
+      const rows = await rpc('app_login', { p_name: name, p_password: password });
+      creds = { name, password, id: rows[0].user_id }; sess = null;
+      try { localStorage.setItem('mingo_cred', JSON.stringify({ name, password })); } catch(e){}
+      $('meName').textContent = rows[0].user_name;
+      $('addNote').classList.remove('hidden');
+    }
     show('home');
     await refreshHome();
     startTimer();
   } catch (e) {
     if (!silent) $('lerr').textContent = e.message;
-    try { localStorage.removeItem('mingo_cred'); } catch(_){}
+    try { localStorage.removeItem('mingo_cred'); sessionStorage.removeItem('mingo_s'); } catch(_){}
   } finally { $('lbtn').disabled = false; }
 }
 $('lbtn').onclick = () => doLogin($('lname').value.trim(), $('lpass').value);
 $('lpass').addEventListener('keydown', e => { if (e.key === 'Enter') $('lbtn').click(); });
-$('logout').onclick = () => {
-  try { localStorage.removeItem('mingo_cred'); } catch(e){}
-  clearInterval(timer); creds = peer = null; $('lpass').value=''; show('login');
-};
+
+function doLogout() {
+  if (sess) { fetch(`${SUPABASE_URL}/auth/v1/logout`, { method:'POST', headers:{ apikey:SUPABASE_ANON, Authorization:'Bearer '+sess.access } }).catch(()=>{}); }
+  try { localStorage.removeItem('mingo_cred'); sessionStorage.removeItem('mingo_s'); } catch(e){}
+  clearInterval(timer); creds = sess = peer = null; $('lpass').value = ''; $('lname').value = ''; show('login');
+}
+$('logout').onclick = doLogout;
 
 /* =================== HOME =================== */
 async function refreshHome() {
   $('sync').classList.add('on');
   try {
-    const [c, n] = await Promise.all([ rpc('app_contacts', A()), rpc('app_get_notes', A()) ]);
-    contactsCache = c; notesCache = n;
+    if (sess) {
+      const [t, n] = await Promise.all([ arpc('admin_threads'), arpc('admin_notes') ]);
+      contactsCache = t; notesCache = n;
+    } else {
+      const [c, n] = await Promise.all([ rpc('app_contacts', A()), rpc('app_get_notes', A()) ]);
+      contactsCache = c; notesCache = n;
+    }
     renderContacts(); renderNotes();
-  } catch (e) { toast(e.message); }
+  } catch (e) { if (creds || sess) toast(e.message); }
   setTimeout(()=>$('sync').classList.remove('on'), 600);
 }
 
@@ -216,52 +255,71 @@ function renderNotes() {
   const box = $('notes');
   if (!notesCache.length) { box.innerHTML = '<div class="empty">පොදු දැන්වීම් නැත</div>'; return; }
   box.innerHTML = notesCache.map(n => `
-    <div class="n-item">${esc(n.body)}
-      <div class="n-meta"><span>${esc(n.sender_name)} · ${fmtFull(n.created_at)}${n.edited_at?' · සංස්කරණය කළා':''}</span>
-      ${creds.admin ? `<span class="n-act"><button data-edit="${n.msg_id}">සංස්කරණය</button><button data-del="${n.msg_id}">මකන්න</button></span>`:''}</div>
+    <div class="n-item"><span class="n-author">${esc(n.note_author)}</span>${esc(n.note_body)}
+      <div class="n-meta"><span>${fmtFull(n.note_at)}</span>
+      ${sess ? `<span class="n-act"><button data-edit="${n.note_id}">සංස්කරණය</button><button data-del="${n.note_id}">මකන්න</button></span>` : ''}</div>
     </div>`).join('');
+  if (!sess) return;
   box.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => {
-    const n = notesCache.find(x => x.msg_id == b.dataset.edit); openEditor('සටහන සංස්කරණය', n.body, async v => { await rpc('app_edit_message', {...A(), p_msg_id:n.msg_id, p_body:v}); refreshHome(); });
+    const n = notesCache.find(x => x.note_id == b.dataset.edit);
+    openEditor('සටහන සංස්කරණය', n.note_body, async v => { await arpc('admin_edit', { p_msg_id: n.note_id, p_body: v }); refreshHome(); });
   });
   box.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
     if (!confirm('මෙම සටහන මකන්නද?')) return;
-    try { await rpc('app_delete_message', {...A(), p_msg_id:+b.dataset.del}); refreshHome(); } catch(e){ toast(e.message); }
+    try { await arpc('admin_delete', { p_msg_id: +b.dataset.del }); refreshHome(); } catch(e){ toast(e.message); }
   });
 }
 
 function renderContacts() {
   const q = $('q').value.trim().toLowerCase();
-  const list = contactsCache.filter(c => c.contact_name.toLowerCase().includes(q));
-  $('contacts').innerHTML = list.length ? list.map(c => `
-    <button class="contact ${c.unread>0?'unread':''}" data-id="${c.contact_id}">
-      <span class="dot"></span>
-      <span class="c-main">
-        <span class="c-name">${esc(c.contact_name)}${c.contact_is_admin?'<span class="tag">Admin</span>':''}</span>
-        ${c.last_at ? `<span class="c-time">${fmtFull(c.last_at)}</span>` : `<span class="c-time">පණිවිඩ නැත</span>`}
-      </span>
-      ${c.unread>0?`<span class="badge">${c.unread}</span>`:''}
-    </button>`).join('') : '<div class="none">කිසිවෙක් හමු නොවීය</div>';
+  let html = '';
+  if (sess) {
+    const list = contactsCache.filter(t => (t.t_a_name + ' ' + t.t_b_name).toLowerCase().includes(q));
+    html = list.map((t, i) => `
+      <button class="contact unread" data-i="${contactsCache.indexOf(t)}">
+        <span class="dot"></span>
+        <span class="c-main"><span class="c-name">${esc(t.t_a_name)} ↔ ${esc(t.t_b_name)}</span>
+        <span class="c-time">${fmtFull(t.t_at)}</span></span>
+        <span class="badge">${t.t_count}</span>
+      </button>`).join('');
+  } else {
+    const list = contactsCache.filter(c => c.contact_name.toLowerCase().includes(q));
+    html = list.map(c => `
+      <button class="contact ${c.unread>0?'unread':''}" data-id="${c.contact_id}">
+        <span class="dot"></span>
+        <span class="c-main"><span class="c-name">${esc(c.contact_name)}</span>
+        <span class="c-time">${c.last_at ? fmtFull(c.last_at) : 'පණිවිඩ නැත'}</span></span>
+        ${c.unread>0?`<span class="badge">${c.unread}</span>`:''}
+      </button>`).join('');
+  }
+  $('contacts').innerHTML = html || '<div class="none">කිසිවක් හමු නොවීය</div>';
   $('contacts').querySelectorAll('.contact').forEach(b => b.onclick = () => {
-    const c = contactsCache.find(x => x.contact_id == b.dataset.id);
-    openChat(c.contact_id, c.contact_name);
+    if (sess) { const t = contactsCache[+b.dataset.i]; openChat({ a: t.t_a, b: t.t_b, an: t.t_a_name, bn: t.t_b_name }); }
+    else { const c = contactsCache.find(x => x.contact_id == b.dataset.id); openChat({ id: c.contact_id, name: c.contact_name }); }
   });
 }
 $('q').addEventListener('input', renderContacts);
 
-$('addNote').onclick = () => openEditor('නව පොදු දැන්වීමක්', '', async v => { await rpc('app_post_note', {...A(), p_body:v}); refreshHome(); });
+$('addNote').onclick = () => openEditor('නව පොදු දැන්වීමක්', '', async v => {
+  await rpc('app_post_note', { ...A(), p_body: v }); refreshHome();
+});
 
 /* =================== CHAT =================== */
-function openChat(id, name) {
-  peer = { id, name }; $('peerName').textContent = name; msgsCache = []; $('msgs').innerHTML = '';
-  show('chat'); loadMessages(true); $('mtext').focus();
+function openChat(p) {
+  peer = p; msgsCache = []; $('msgs').innerHTML = '';
+  $('peerName').textContent = sess ? `${p.an} ↔ ${p.bn}` : p.name;
+  $('composer').classList.toggle('hidden', !!sess);
+  show('chat'); loadMessages(true);
+  if (!sess) $('mtext').focus();
 }
 $('back').onclick = () => { peer = null; show('home'); refreshHome(); };
 
 async function loadMessages(scrollDown) {
   if (!peer) return;
   try {
-    const rows = await rpc('app_get_messages', { ...A(), p_peer: peer.id });
-    msgsCache = rows; renderMessages(scrollDown);
+    msgsCache = sess ? await arpc('admin_thread', { p_a: peer.a, p_b: peer.b })
+                     : await rpc('app_get_messages', { ...A(), p_peer: peer.id });
+    renderMessages(scrollDown);
   } catch (e) { toast(e.message); }
 }
 
@@ -270,28 +328,30 @@ function renderMessages(forceScroll) {
   const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
   let html = '', lastDay = '';
   for (const m of msgsCache) {
-    const d = new Date(m.created_at), day = fmtDate(d);
+    const d = new Date(m.msg_at), day = fmtDate(d);
     if (day !== lastDay) { html += `<div class="day">${day}</div>`; lastDay = day; }
-    const mine = m.sender_id === creds.id;
-    html += `<div class="m ${mine?'out':'in'}">${esc(m.body)}
-      <div class="mt">${m.edited_at?'<span>සංස්කරණය</span>':''}<span>${fmtTime(d)}</span>${mine && m.read_at?'<span>✓✓</span>':''}</div>
-      ${creds.admin?`<div class="acts"><button data-e="${m.msg_id}">සංස්කරණය</button><button data-d="${m.msg_id}">මකන්න</button></div>`:''}</div>`;
+    const side = sess ? (m.msg_sender === peer.a ? 'in' : 'out') : (m.msg_sender === creds.id ? 'out' : 'in');
+    html += `<div class="m ${side}">${sess ? `<span class="who">${esc(m.msg_sender_name)}</span>` : ''}${esc(m.msg_body)}
+      <div class="mt"><span>${fmtTime(d)}</span>${!sess && side==='out' && m.msg_read ? '<span>✓✓</span>' : ''}</div>
+      ${sess ? `<div class="acts"><button data-e="${m.msg_id}">සංස්කරණය</button><button data-d="${m.msg_id}">මකන්න</button></div>` : ''}</div>`;
   }
-  box.innerHTML = html || '<div class="day">පණිවිඩ නැත — පළමු පණිවිඩය යවන්න</div>';
-  box.querySelectorAll('[data-e]').forEach(b => b.onclick = () => {
-    const m = msgsCache.find(x => x.msg_id == b.dataset.e);
-    openEditor('පණිවිඩය සංස්කරණය', m.body, async v => { await rpc('app_edit_message', {...A(), p_msg_id:m.msg_id, p_body:v}); loadMessages(); });
-  });
-  box.querySelectorAll('[data-d]').forEach(b => b.onclick = async () => {
-    if (!confirm('මෙම පණිවිඩය මකන්නද?')) return;
-    try { await rpc('app_delete_message', {...A(), p_msg_id:+b.dataset.d}); loadMessages(); } catch(e){ toast(e.message); }
-  });
+  box.innerHTML = html || '<div class="day">පණිවිඩ නැත</div>';
+  if (sess) {
+    box.querySelectorAll('[data-e]').forEach(b => b.onclick = () => {
+      const m = msgsCache.find(x => x.msg_id == b.dataset.e);
+      openEditor('පණිවිඩය සංස්කරණය', m.msg_body, async v => { await arpc('admin_edit', { p_msg_id: m.msg_id, p_body: v }); loadMessages(); });
+    });
+    box.querySelectorAll('[data-d]').forEach(b => b.onclick = async () => {
+      if (!confirm('මෙම පණිවිඩය මකන්නද?')) return;
+      try { await arpc('admin_delete', { p_msg_id: +b.dataset.d }); loadMessages(); } catch(e){ toast(e.message); }
+    });
+  }
   if (forceScroll || atBottom) box.scrollTop = box.scrollHeight;
 }
 
 $('composer').addEventListener('submit', async e => {
   e.preventDefault();
-  const body = $('mtext').value.trim(); if (!body || !peer) return;
+  const body = $('mtext').value.trim(); if (!body || !peer || !creds) return;
   $('sendBtn').disabled = true;
   try {
     await rpc('app_send', { ...A(), p_peer: peer.id, p_body: body });
@@ -323,19 +383,27 @@ function openEditor(title, initial, onSave) {
 function startTimer() {
   clearInterval(timer);
   timer = setInterval(() => {
-    if (!creds || document.hidden) return;
+    if ((!creds && !sess) || document.hidden) return;
     if (peer) loadMessages(); else refreshHome();
   }, REFRESH_MS);
 }
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && creds) { peer ? loadMessages() : refreshHome(); }
+  if (!document.hidden && (creds || sess)) { peer ? loadMessages() : refreshHome(); }
 });
 
 /* =================== BOOT =================== */
-(function boot(){
+(async function boot(){
   try {
-    const s = JSON.parse(localStorage.getItem('mingo_cred') || 'null');
-    if (s && s.name) doLogin(s.name, s.password, true);
+    const s = JSON.parse(sessionStorage.getItem('mingo_s') || 'null');
+    if (s && s.refresh) {
+      sess = s;
+      let ok = false;
+      try { ok = await arpc('admin_check'); } catch(e){}
+      if (ok) { creds = null; $('addNote').classList.add('hidden'); show('home'); await refreshHome(); startTimer(); return; }
+      sess = null; sessionStorage.removeItem('mingo_s');
+    }
+    const c = JSON.parse(localStorage.getItem('mingo_cred') || 'null');
+    if (c && c.name) doLogin(c.name, c.password, true);
   } catch(e){}
 })();
 </script>
