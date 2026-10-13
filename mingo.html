@@ -2,7 +2,7 @@
 <html lang="si">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Mingo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Noto+Sans+Sinhala:wght@400;600&family=Noto+Serif:wght@400;600&display=swap" rel="stylesheet">
@@ -13,9 +13,9 @@
   --radius:28px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{background:#e9e4e8;font-family:'Noto Sans Sinhala','Noto Serif',system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center}
-.app{width:100%;max-width:480px;height:100dvh;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden;border:1px solid var(--crimson)}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{position:fixed;inset:0;background:#e9e4e8;font-family:'Noto Sans Sinhala','Noto Serif',system-ui,sans-serif;color:var(--ink);display:flex;justify-content:center}
+.app{width:100%;max-width:480px;height:var(--vh,100dvh);background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden;border:1px solid var(--crimson)}
 @media(min-width:520px){.app{height:min(900px,96dvh);margin:2dvh 0;border-radius:var(--radius)}}
 .brand{font-family:'Anton',Impact,sans-serif;color:var(--crimson);letter-spacing:.5px}
 .hidden{display:none!important}
@@ -84,6 +84,11 @@ input,textarea{font:inherit;outline:none;border:0;color:var(--ink)}
 .send{background:var(--crimson);color:#fff;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;flex:none}
 .send:disabled{opacity:.5}
 
+/* WhatsApp-style chat layout */
+.chat-h,.composer{flex:none}
+.msgs>:first-child{margin-top:auto}
+.msgs{overscroll-behavior:contain}
+
 /* ---------- modal & toast ---------- */
 .modal{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;z-index:10}
 .sheet{background:var(--bg);width:100%;border-radius:var(--radius) var(--radius) 0 0;padding:20px;display:flex;flex-direction:column;gap:12px}
@@ -100,7 +105,7 @@ input,textarea{font:inherit;outline:none;border:0;color:var(--ink)}
 <div class="app" id="app">
 
   <!-- LOGIN -->
-  <section id="login">
+  <section id="login" class="hidden">
     <h1 class="brand">Mingo</h1>
     <p class="sub">ඔබේ නමත් මුරපදයත් ඇතුළත් කරන්න</p>
     <input class="field" id="lname" placeholder="නම (Username)" autocomplete="username" autocapitalize="off">
@@ -158,12 +163,26 @@ let peer  = null;      // විවෘත සංවාදය
 let contactsCache = [], notesCache = [], msgsCache = [];
 let timer = null;
 
+/* --- තිරයේ සැබෑ උසට app එක හැඩගැස්වීම (keyboard එක ආවත් composer එක පෙනේ) --- */
+function fitVH(){
+  const h = window.visualViewport ? visualViewport.height : innerHeight;
+  document.documentElement.style.setProperty('--vh', h + 'px');
+  window.scrollTo(0, 0);
+  if (peer) { const b = $('msgs'); b.scrollTop = b.scrollHeight; }
+}
+if (window.visualViewport) { visualViewport.addEventListener('resize', fitVH); visualViewport.addEventListener('scroll', fitVH); }
+addEventListener('resize', fitVH); fitVH();
+
+function netErr(){ const e = new Error('අන්තර්ජාලය නැත'); e.network = true; return e; }
 async function rpc(fn, args = {}, token) {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
-    method: 'POST',
-    headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + (token || SUPABASE_ANON), 'Content-Type': 'application/json' },
-    body: JSON.stringify(args)
-  });
+  let r;
+  try {
+    r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_ANON, Authorization: 'Bearer ' + (token || SUPABASE_ANON), 'Content-Type': 'application/json' },
+      body: JSON.stringify(args)
+    });
+  } catch (_) { throw netErr(); }
   const data = await r.json().catch(() => null);
   if (!r.ok) throw new Error((data && (data.message || data.hint)) || 'සම්බන්ධ විය නොහැක');
   return data;
@@ -172,21 +191,24 @@ const A = () => ({ p_name: creds.name, p_password: creds.password });
 
 /* --- Supabase Auth (සැඟවුණු පිවිසුම) --- */
 async function authCall(grant, body) {
-  const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=${grant}`, {
-    method: 'POST', headers: { apikey: SUPABASE_ANON, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
-  });
+  let r;
+  try {
+    r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=${grant}`, {
+      method: 'POST', headers: { apikey: SUPABASE_ANON, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+  } catch (_) { throw netErr(); }
   const d = await r.json().catch(() => null);
   if (!r.ok || !d || !d.access_token) throw new Error(BAD_LOGIN);
   return d;
 }
 function keepSession(d, email) {
   sess = { access: d.access_token, refresh: d.refresh_token, exp: Date.now() + (d.expires_in || 3600) * 1000, email: email || (sess && sess.email) || '' };
-  try { sessionStorage.setItem('mingo_s', JSON.stringify(sess)); } catch(e){}
+  try { localStorage.setItem('mingo_s', JSON.stringify(sess)); } catch(e){}
 }
 async function arpc(fn, args = {}) {
   if (Date.now() > sess.exp - 60000) {
     try { keepSession(await authCall('refresh_token', { refresh_token: sess.refresh })); }
-    catch (e) { doLogout(); throw new Error('සැසිය අවසන් විය'); }
+    catch (e) { if (e.network) throw e; doLogout(); throw new Error('සැසිය අවසන් විය'); }
   }
   return rpc(fn, args, sess.access);
 }
@@ -195,6 +217,13 @@ function pad(n){return String(n).padStart(2,'0')}
 function fmtTime(d){ let h=d.getHours(), ap=h>=12?'pm':'am'; h=h%12||12; return `${pad(h)}.${pad(d.getMinutes())}${ap}`; }
 function fmtDate(d){ return `${pad(d.getMonth()+1)}.${pad(d.getDate())}.${d.getFullYear()}`; }   // MM.DD.YYYY
 function fmtFull(iso){ const d=new Date(iso); return `${fmtTime(d)}  ${fmtDate(d)}`; }
+
+/* --- නොකියවූ ගණන (සංවාදය විවෘත කළ වේලාව අනුව, උපාංගයේ සුරැකේ) --- */
+const seenKey = k => 'mingo_seen_' + (creds ? creds.id : 'adm') + '_' + k;
+function getSeen(k){ try { return +localStorage.getItem(seenKey(k)) || 0; } catch(e){ return 0; } }
+function setSeen(k, t){ try { if (t > getSeen(k)) localStorage.setItem(seenKey(k), t); } catch(e){} }
+function unreadOf(count, lastAt, k){ return (lastAt && new Date(lastAt).getTime() <= getSeen(k)) ? 0 : (count || 0); }
+
 function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; $('app').appendChild(t); setTimeout(()=>t.remove(),2600); }
 function show(id){ ['login','home','chat'].forEach(s=>$(s).classList.toggle('hidden', s!==id)); }
 
@@ -206,14 +235,14 @@ async function doLogin(name, password, silent) {
       keepSession(await authCall('password', { email: name, password }), name);
       let ok = false;
       try { ok = await rpc('admin_check', {}, sess.access); } catch(e){}
-      if (!ok) { sess = null; try { sessionStorage.removeItem('mingo_s'); } catch(e){} throw new Error(BAD_LOGIN); }
+      if (!ok) { sess = null; try { localStorage.removeItem('mingo_s'); } catch(e){} throw new Error(BAD_LOGIN); }
       creds = null;
       $('meName').textContent = '';
       $('addNote').classList.remove('hidden');
     } else {                                        // සාමාන්‍ය සිසුවා
       const rows = await rpc('app_login', { p_name: name, p_password: password });
       creds = { name, password, id: rows[0].user_id }; sess = null;
-      try { localStorage.setItem('mingo_cred', JSON.stringify({ name, password })); } catch(e){}
+      try { localStorage.setItem('mingo_cred', JSON.stringify({ name, password, id: rows[0].user_id, uname: rows[0].user_name })); } catch(e){}
       $('meName').textContent = rows[0].user_name;
       $('addNote').classList.remove('hidden');
     }
@@ -222,7 +251,7 @@ async function doLogin(name, password, silent) {
     startTimer();
   } catch (e) {
     if (!silent) $('lerr').textContent = e.message;
-    try { localStorage.removeItem('mingo_cred'); sessionStorage.removeItem('mingo_s'); } catch(_){}
+    try { localStorage.removeItem('mingo_cred'); localStorage.removeItem('mingo_s'); } catch(_){}
   } finally { $('lbtn').disabled = false; }
 }
 $('lbtn').onclick = () => doLogin($('lname').value.trim(), $('lpass').value);
@@ -230,7 +259,7 @@ $('lpass').addEventListener('keydown', e => { if (e.key === 'Enter') $('lbtn').c
 
 function doLogout() {
   if (sess) { fetch(`${SUPABASE_URL}/auth/v1/logout`, { method:'POST', headers:{ apikey:SUPABASE_ANON, Authorization:'Bearer '+sess.access } }).catch(()=>{}); }
-  try { localStorage.removeItem('mingo_cred'); sessionStorage.removeItem('mingo_s'); } catch(e){}
+  try { localStorage.removeItem('mingo_cred'); localStorage.removeItem('mingo_s'); } catch(e){}
   clearInterval(timer); creds = sess = peer = null; $('lpass').value = ''; $('lname').value = ''; show('login');
 }
 $('logout').onclick = doLogout;
@@ -285,22 +314,26 @@ function renderContacts() {
   let html = '';
   if (sess) {
     const list = contactsCache.filter(t => (t.t_a_name + ' ' + t.t_b_name).toLowerCase().includes(q));
-    html = list.map(t => `
-      <button class="contact ${t.t_count>0?'unread':''}" data-i="${contactsCache.indexOf(t)}">
+    html = list.map(t => {
+      const n = unreadOf(t.t_count, t.t_at, t.t_a + '-' + t.t_b);
+      return `
+      <button class="contact ${n>0?'unread':''}" data-i="${contactsCache.indexOf(t)}">
         <span class="dot"></span>
         <span class="c-main"><span class="c-name">${esc(t.t_a_name)} ↔ ${esc(t.t_b_name)}</span>
         <span class="c-time">${t.t_at ? fmtFull(t.t_at) : 'පණිවිඩ නැත'}</span></span>
-        ${t.t_count>0?`<span class="badge">${t.t_count}</span>`:''}
-      </button>`).join('');
+        ${n>0?`<span class="badge">${n}</span>`:''}
+      </button>`; }).join('');
   } else {
     const list = contactsCache.filter(c => c.contact_name.toLowerCase().includes(q));
-    html = list.map(c => `
-      <button class="contact ${c.unread>0?'unread':''}" data-id="${c.contact_id}">
+    html = list.map(c => {
+      const n = unreadOf(c.unread, c.last_at, c.contact_id);
+      return `
+      <button class="contact ${n>0?'unread':''}" data-id="${c.contact_id}">
         <span class="dot"></span>
         <span class="c-main"><span class="c-name">${esc(c.contact_name)}</span>
         <span class="c-time">${c.last_at ? fmtFull(c.last_at) : 'පණිවිඩ නැත'}</span></span>
-        ${c.unread>0?`<span class="badge">${c.unread}</span>`:''}
-      </button>`).join('');
+        ${n>0?`<span class="badge">${n}</span>`:''}
+      </button>`; }).join('');
   }
   $('contacts').innerHTML = html || '<div class="none">කිසිවක් හමු නොවීය</div>';
   $('contacts').querySelectorAll('.contact').forEach(b => b.onclick = () => {
@@ -318,14 +351,14 @@ $('addNote').onclick = () => openEditor('නව පොදු දැන්වී�
 
 /* =================== CHAT =================== */
 function openChat(p) {
-  peer = p; msgsCache = []; $('msgs').innerHTML = '';
+  peer = p; p.key = sess ? p.a + '-' + p.b : p.id; msgsCache = []; $('msgs').innerHTML = '';
   $('peerName').textContent = sess ? `${p.an} ↔ ${p.bn}` : p.name;
   // කළමනාකරුට ලියිය හැක්කේ තමා සහභාගී වන සංවාදවල පමණි (a = 0)
   $('composer').classList.toggle('hidden', !!sess && p.a !== 0);
   show('chat'); loadMessages(true);
   if (!sess || p.a === 0) $('mtext').focus();
 }
-$('back').onclick = () => { peer = null; show('home'); refreshHome(); };
+$('back').onclick = () => { peer = null; show('home'); renderContacts(); refreshHome(); };
 
 async function loadMessages(scrollDown) {
   if (!peer) return;
@@ -333,6 +366,7 @@ async function loadMessages(scrollDown) {
     msgsCache = sess ? await arpc('admin_thread', { p_a: peer.a, p_b: peer.b })
                      : await rpc('app_get_messages', { ...A(), p_peer: peer.id });
     renderMessages(scrollDown);
+    if (peer && msgsCache.length) setSeen(peer.key, Math.max(...msgsCache.map(m => new Date(m.msg_at).getTime())));
   } catch (e) { toast(e.message); }
 }
 
@@ -373,6 +407,7 @@ $('composer').addEventListener('submit', async e => {
     else await rpc('app_send', { ...A(), p_peer: peer.id, p_body: body });
     $('mtext').value = ''; $('mtext').style.height = 'auto';
     await loadMessages(true);
+    $('mtext').focus();
   } catch (err) { toast(err.message); }
   $('sendBtn').disabled = false;
 });
@@ -410,17 +445,33 @@ document.addEventListener('visibilitychange', () => {
 /* =================== BOOT =================== */
 (async function boot(){
   try {
-    const s = JSON.parse(sessionStorage.getItem('mingo_s') || 'null');
+    // කළමනාකරු
+    const s = JSON.parse(localStorage.getItem('mingo_s') || 'null');
     if (s && s.refresh) {
-      sess = s;
-      let ok = false;
-      try { ok = await arpc('admin_check'); } catch(e){}
-      if (ok) { creds = null; $('addNote').classList.remove('hidden'); show('home'); await refreshHome(); startTimer(); return; }
-      sess = null; sessionStorage.removeItem('mingo_s');
+      sess = s; creds = null;
+      let ok = true;
+      try { ok = await arpc('admin_check'); } catch(e){ if (!e.network) ok = false; }
+      if (ok) { show('home'); startTimer(); refreshHome(); return; }
+      sess = null; localStorage.removeItem('mingo_s');
     }
+    // සිසුවා
     const c = JSON.parse(localStorage.getItem('mingo_cred') || 'null');
-    if (c && c.name) doLogin(c.name, c.password, true);
+    if (c && c.name) {
+      let id = c.id, un = c.uname;
+      try {
+        const rows = await rpc('app_login', { p_name: c.name, p_password: c.password });
+        id = rows[0].user_id; un = rows[0].user_name;
+        localStorage.setItem('mingo_cred', JSON.stringify({ ...c, id, uname: un }));
+      } catch (e) {
+        if (!e.network) { doLogout(); return; }   // මුරපදය වෙනස් වී ඇත්නම් පමණක් ඉවත් කරයි
+        if (id == null) return;
+      }
+      creds = { name: c.name, password: c.password, id };
+      $('meName').textContent = un || c.name;
+      show('home'); startTimer(); refreshHome();
+    }
   } catch(e){}
+  finally { if (!creds && !sess) show('login'); }
 })();
 </script>
 </body>
