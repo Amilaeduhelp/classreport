@@ -209,7 +209,7 @@ async function doLogin(name, password, silent) {
       if (!ok) { sess = null; try { sessionStorage.removeItem('mingo_s'); } catch(e){} throw new Error(BAD_LOGIN); }
       creds = null;
       $('meName').textContent = '';
-      $('addNote').classList.add('hidden');
+      $('addNote').classList.remove('hidden');
     } else {                                        // සාමාන්‍ය සිසුවා
       const rows = await rpc('app_login', { p_name: name, p_password: password });
       creds = { name, password, id: rows[0].user_id }; sess = null;
@@ -240,8 +240,8 @@ async function refreshHome() {
   $('sync').classList.add('on');
   try {
     if (sess) {
-      const [t, n] = await Promise.all([ arpc('admin_threads'), arpc('admin_notes') ]);
-      contactsCache = t; notesCache = n;
+      const [t, n, st] = await Promise.all([ arpc('admin_threads'), arpc('admin_notes'), arpc('admin_students') ]);
+      contactsCache = buildAdminEntries(t, st); notesCache = n;
     } else {
       const [c, n] = await Promise.all([ rpc('app_contacts', A()), rpc('app_get_notes', A()) ]);
       contactsCache = c; notesCache = n;
@@ -249,6 +249,16 @@ async function refreshHome() {
     renderContacts(); renderNotes();
   } catch (e) { if (creds || sess) toast(e.message); }
   setTimeout(()=>$('sync').classList.remove('on'), 600);
+}
+
+/* කළමනාකරු: සියලු සංවාද + තවම පණිවිඩ නැති සිසුන් (ඔවුන්ට පණිවිඩ යැවීමට) */
+function buildAdminEntries(threads, students) {
+  const adm = students.find(s => s.s_id === 0);
+  const adminName = adm ? adm.s_name : 'Admin';
+  const have = new Set(threads.filter(t => t.t_a === 0).map(t => t.t_b));
+  const extra = students.filter(s => s.s_id !== 0 && !have.has(s.s_id))
+    .map(s => ({ t_a: 0, t_a_name: adminName, t_b: s.s_id, t_b_name: s.s_name, t_at: null, t_count: 0 }));
+  return threads.concat(extra);
 }
 
 function renderNotes() {
@@ -275,12 +285,12 @@ function renderContacts() {
   let html = '';
   if (sess) {
     const list = contactsCache.filter(t => (t.t_a_name + ' ' + t.t_b_name).toLowerCase().includes(q));
-    html = list.map((t, i) => `
-      <button class="contact unread" data-i="${contactsCache.indexOf(t)}">
+    html = list.map(t => `
+      <button class="contact ${t.t_count>0?'unread':''}" data-i="${contactsCache.indexOf(t)}">
         <span class="dot"></span>
         <span class="c-main"><span class="c-name">${esc(t.t_a_name)} ↔ ${esc(t.t_b_name)}</span>
-        <span class="c-time">${fmtFull(t.t_at)}</span></span>
-        <span class="badge">${t.t_count}</span>
+        <span class="c-time">${t.t_at ? fmtFull(t.t_at) : 'පණිවිඩ නැත'}</span></span>
+        ${t.t_count>0?`<span class="badge">${t.t_count}</span>`:''}
       </button>`).join('');
   } else {
     const list = contactsCache.filter(c => c.contact_name.toLowerCase().includes(q));
@@ -301,16 +311,19 @@ function renderContacts() {
 $('q').addEventListener('input', renderContacts);
 
 $('addNote').onclick = () => openEditor('නව පොදු දැන්වීමක්', '', async v => {
-  await rpc('app_post_note', { ...A(), p_body: v }); refreshHome();
+  if (sess) await arpc('admin_post_note', { p_body: v });
+  else await rpc('app_post_note', { ...A(), p_body: v });
+  refreshHome();
 });
 
 /* =================== CHAT =================== */
 function openChat(p) {
   peer = p; msgsCache = []; $('msgs').innerHTML = '';
   $('peerName').textContent = sess ? `${p.an} ↔ ${p.bn}` : p.name;
-  $('composer').classList.toggle('hidden', !!sess);
+  // කළමනාකරුට ලියිය හැක්කේ තමා සහභාගී වන සංවාදවල පමණි (a = 0)
+  $('composer').classList.toggle('hidden', !!sess && p.a !== 0);
   show('chat'); loadMessages(true);
-  if (!sess) $('mtext').focus();
+  if (!sess || p.a === 0) $('mtext').focus();
 }
 $('back').onclick = () => { peer = null; show('home'); refreshHome(); };
 
@@ -330,7 +343,9 @@ function renderMessages(forceScroll) {
   for (const m of msgsCache) {
     const d = new Date(m.msg_at), day = fmtDate(d);
     if (day !== lastDay) { html += `<div class="day">${day}</div>`; lastDay = day; }
-    const side = sess ? (m.msg_sender === peer.a ? 'in' : 'out') : (m.msg_sender === creds.id ? 'out' : 'in');
+    // කළමනාකරු: Admin සංවාදවල Admin ගේ පණිවිඩ දකුණේ; සිසුන් අතර සංවාදවල දෙවන අයගේ පණිවිඩ දකුණේ
+    const side = sess ? (m.msg_sender === (peer.a === 0 ? 0 : peer.b) ? 'out' : 'in')
+                      : (m.msg_sender === creds.id ? 'out' : 'in');
     html += `<div class="m ${side}">${sess ? `<span class="who">${esc(m.msg_sender_name)}</span>` : ''}${esc(m.msg_body)}
       <div class="mt"><span>${fmtTime(d)}</span>${!sess && side==='out' && m.msg_read ? '<span>✓✓</span>' : ''}</div>
       ${sess ? `<div class="acts"><button data-e="${m.msg_id}">සංස්කරණය</button><button data-d="${m.msg_id}">මකන්න</button></div>` : ''}</div>`;
@@ -351,10 +366,11 @@ function renderMessages(forceScroll) {
 
 $('composer').addEventListener('submit', async e => {
   e.preventDefault();
-  const body = $('mtext').value.trim(); if (!body || !peer || !creds) return;
+  const body = $('mtext').value.trim(); if (!body || !peer || (!creds && !sess)) return;
   $('sendBtn').disabled = true;
   try {
-    await rpc('app_send', { ...A(), p_peer: peer.id, p_body: body });
+    if (sess) await arpc('admin_send', { p_peer: peer.b, p_body: body });
+    else await rpc('app_send', { ...A(), p_peer: peer.id, p_body: body });
     $('mtext').value = ''; $('mtext').style.height = 'auto';
     await loadMessages(true);
   } catch (err) { toast(err.message); }
@@ -399,7 +415,7 @@ document.addEventListener('visibilitychange', () => {
       sess = s;
       let ok = false;
       try { ok = await arpc('admin_check'); } catch(e){}
-      if (ok) { creds = null; $('addNote').classList.add('hidden'); show('home'); await refreshHome(); startTimer(); return; }
+      if (ok) { creds = null; $('addNote').classList.remove('hidden'); show('home'); await refreshHome(); startTimer(); return; }
       sess = null; sessionStorage.removeItem('mingo_s');
     }
     const c = JSON.parse(localStorage.getItem('mingo_cred') || 'null');
